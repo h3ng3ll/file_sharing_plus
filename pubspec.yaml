@@ -45,6 +45,10 @@ dependencies:
   # Native share / "Save to Files" sheet
   share_plus: ^10.1.4
 
+  # Local persistence (transfer history)
+  hive_ce: ^2.18.0
+  hive_ce_flutter: ^2.3.4
+
   # Spacing helper
   gap: ^3.0.1
 
@@ -65,6 +69,7 @@ dev_dependencies:
   build_runner: ^2.5.4
   freezed: ^3.2.3
   json_serializable: ^6.9.5
+  hive_ce_generator: ^1.11.0
 
 flutter:
   uses-material-design: true

@@ -608,7 +608,9 @@ as String?,
 /// @nodoc
 mixin _$BrowserState {
 
- BrowserStatus get status; DiscoveredServer? get server; String get path; List<FileEntry> get files; TransferProgress? get progress; List<TransferRecord> get history; String get errorMessage;
+ BrowserStatus get status; DiscoveredServer? get server; String get path; List<FileEntry> get files; TransferProgress? get progress;/// The most recently finished transfer (drives the per-transfer toast and
+/// the optional Save-to-Files prompt). History itself lives in HistoryBloc.
+ TransferRecord? get lastTransfer; String get errorMessage;
 /// Create a copy of BrowserState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -619,16 +621,16 @@ $BrowserStateCopyWith<BrowserState> get copyWith => _$BrowserStateCopyWithImpl<B
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is BrowserState&&(identical(other.status, status) || other.status == status)&&(identical(other.server, server) || other.server == server)&&(identical(other.path, path) || other.path == path)&&const DeepCollectionEquality().equals(other.files, files)&&(identical(other.progress, progress) || other.progress == progress)&&const DeepCollectionEquality().equals(other.history, history)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is BrowserState&&(identical(other.status, status) || other.status == status)&&(identical(other.server, server) || other.server == server)&&(identical(other.path, path) || other.path == path)&&const DeepCollectionEquality().equals(other.files, files)&&(identical(other.progress, progress) || other.progress == progress)&&(identical(other.lastTransfer, lastTransfer) || other.lastTransfer == lastTransfer)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,server,path,const DeepCollectionEquality().hash(files),progress,const DeepCollectionEquality().hash(history),errorMessage);
+int get hashCode => Object.hash(runtimeType,status,server,path,const DeepCollectionEquality().hash(files),progress,lastTransfer,errorMessage);
 
 @override
 String toString() {
-  return 'BrowserState(status: $status, server: $server, path: $path, files: $files, progress: $progress, history: $history, errorMessage: $errorMessage)';
+  return 'BrowserState(status: $status, server: $server, path: $path, files: $files, progress: $progress, lastTransfer: $lastTransfer, errorMessage: $errorMessage)';
 }
 
 
@@ -639,11 +641,11 @@ abstract mixin class $BrowserStateCopyWith<$Res>  {
   factory $BrowserStateCopyWith(BrowserState value, $Res Function(BrowserState) _then) = _$BrowserStateCopyWithImpl;
 @useResult
 $Res call({
- BrowserStatus status, DiscoveredServer? server, String path, List<FileEntry> files, TransferProgress? progress, List<TransferRecord> history, String errorMessage
+ BrowserStatus status, DiscoveredServer? server, String path, List<FileEntry> files, TransferProgress? progress, TransferRecord? lastTransfer, String errorMessage
 });
 
 
-$TransferProgressCopyWith<$Res>? get progress;
+$TransferProgressCopyWith<$Res>? get progress;$TransferRecordCopyWith<$Res>? get lastTransfer;
 
 }
 /// @nodoc
@@ -656,15 +658,15 @@ class _$BrowserStateCopyWithImpl<$Res>
 
 /// Create a copy of BrowserState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? server = freezed,Object? path = null,Object? files = null,Object? progress = freezed,Object? history = null,Object? errorMessage = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? server = freezed,Object? path = null,Object? files = null,Object? progress = freezed,Object? lastTransfer = freezed,Object? errorMessage = null,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as BrowserStatus,server: freezed == server ? _self.server : server // ignore: cast_nullable_to_non_nullable
 as DiscoveredServer?,path: null == path ? _self.path : path // ignore: cast_nullable_to_non_nullable
 as String,files: null == files ? _self.files : files // ignore: cast_nullable_to_non_nullable
 as List<FileEntry>,progress: freezed == progress ? _self.progress : progress // ignore: cast_nullable_to_non_nullable
-as TransferProgress?,history: null == history ? _self.history : history // ignore: cast_nullable_to_non_nullable
-as List<TransferRecord>,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as TransferProgress?,lastTransfer: freezed == lastTransfer ? _self.lastTransfer : lastTransfer // ignore: cast_nullable_to_non_nullable
+as TransferRecord?,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -679,6 +681,18 @@ $TransferProgressCopyWith<$Res>? get progress {
 
   return $TransferProgressCopyWith<$Res>(_self.progress!, (value) {
     return _then(_self.copyWith(progress: value));
+  });
+}/// Create a copy of BrowserState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TransferRecordCopyWith<$Res>? get lastTransfer {
+    if (_self.lastTransfer == null) {
+    return null;
+  }
+
+  return $TransferRecordCopyWith<$Res>(_self.lastTransfer!, (value) {
+    return _then(_self.copyWith(lastTransfer: value));
   });
 }
 }
@@ -759,10 +773,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( BrowserStatus status,  DiscoveredServer? server,  String path,  List<FileEntry> files,  TransferProgress? progress,  List<TransferRecord> history,  String errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( BrowserStatus status,  DiscoveredServer? server,  String path,  List<FileEntry> files,  TransferProgress? progress,  TransferRecord? lastTransfer,  String errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _BrowserState() when $default != null:
-return $default(_that.status,_that.server,_that.path,_that.files,_that.progress,_that.history,_that.errorMessage);case _:
+return $default(_that.status,_that.server,_that.path,_that.files,_that.progress,_that.lastTransfer,_that.errorMessage);case _:
   return orElse();
 
 }
@@ -780,10 +794,10 @@ return $default(_that.status,_that.server,_that.path,_that.files,_that.progress,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( BrowserStatus status,  DiscoveredServer? server,  String path,  List<FileEntry> files,  TransferProgress? progress,  List<TransferRecord> history,  String errorMessage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( BrowserStatus status,  DiscoveredServer? server,  String path,  List<FileEntry> files,  TransferProgress? progress,  TransferRecord? lastTransfer,  String errorMessage)  $default,) {final _that = this;
 switch (_that) {
 case _BrowserState():
-return $default(_that.status,_that.server,_that.path,_that.files,_that.progress,_that.history,_that.errorMessage);}
+return $default(_that.status,_that.server,_that.path,_that.files,_that.progress,_that.lastTransfer,_that.errorMessage);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -797,10 +811,10 @@ return $default(_that.status,_that.server,_that.path,_that.files,_that.progress,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( BrowserStatus status,  DiscoveredServer? server,  String path,  List<FileEntry> files,  TransferProgress? progress,  List<TransferRecord> history,  String errorMessage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( BrowserStatus status,  DiscoveredServer? server,  String path,  List<FileEntry> files,  TransferProgress? progress,  TransferRecord? lastTransfer,  String errorMessage)?  $default,) {final _that = this;
 switch (_that) {
 case _BrowserState() when $default != null:
-return $default(_that.status,_that.server,_that.path,_that.files,_that.progress,_that.history,_that.errorMessage);case _:
+return $default(_that.status,_that.server,_that.path,_that.files,_that.progress,_that.lastTransfer,_that.errorMessage);case _:
   return null;
 
 }
@@ -812,7 +826,7 @@ return $default(_that.status,_that.server,_that.path,_that.files,_that.progress,
 
 
 class _BrowserState implements BrowserState {
-  const _BrowserState({this.status = BrowserStatus.initial, this.server, this.path = '', final  List<FileEntry> files = const <FileEntry>[], this.progress, final  List<TransferRecord> history = const <TransferRecord>[], this.errorMessage = ''}): _files = files,_history = history;
+  const _BrowserState({this.status = BrowserStatus.initial, this.server, this.path = '', final  List<FileEntry> files = const <FileEntry>[], this.progress, this.lastTransfer, this.errorMessage = ''}): _files = files;
   
 
 @override@JsonKey() final  BrowserStatus status;
@@ -826,13 +840,9 @@ class _BrowserState implements BrowserState {
 }
 
 @override final  TransferProgress? progress;
- final  List<TransferRecord> _history;
-@override@JsonKey() List<TransferRecord> get history {
-  if (_history is EqualUnmodifiableListView) return _history;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_history);
-}
-
+/// The most recently finished transfer (drives the per-transfer toast and
+/// the optional Save-to-Files prompt). History itself lives in HistoryBloc.
+@override final  TransferRecord? lastTransfer;
 @override@JsonKey() final  String errorMessage;
 
 /// Create a copy of BrowserState
@@ -845,16 +855,16 @@ _$BrowserStateCopyWith<_BrowserState> get copyWith => __$BrowserStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _BrowserState&&(identical(other.status, status) || other.status == status)&&(identical(other.server, server) || other.server == server)&&(identical(other.path, path) || other.path == path)&&const DeepCollectionEquality().equals(other._files, _files)&&(identical(other.progress, progress) || other.progress == progress)&&const DeepCollectionEquality().equals(other._history, _history)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _BrowserState&&(identical(other.status, status) || other.status == status)&&(identical(other.server, server) || other.server == server)&&(identical(other.path, path) || other.path == path)&&const DeepCollectionEquality().equals(other._files, _files)&&(identical(other.progress, progress) || other.progress == progress)&&(identical(other.lastTransfer, lastTransfer) || other.lastTransfer == lastTransfer)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,server,path,const DeepCollectionEquality().hash(_files),progress,const DeepCollectionEquality().hash(_history),errorMessage);
+int get hashCode => Object.hash(runtimeType,status,server,path,const DeepCollectionEquality().hash(_files),progress,lastTransfer,errorMessage);
 
 @override
 String toString() {
-  return 'BrowserState(status: $status, server: $server, path: $path, files: $files, progress: $progress, history: $history, errorMessage: $errorMessage)';
+  return 'BrowserState(status: $status, server: $server, path: $path, files: $files, progress: $progress, lastTransfer: $lastTransfer, errorMessage: $errorMessage)';
 }
 
 
@@ -865,11 +875,11 @@ abstract mixin class _$BrowserStateCopyWith<$Res> implements $BrowserStateCopyWi
   factory _$BrowserStateCopyWith(_BrowserState value, $Res Function(_BrowserState) _then) = __$BrowserStateCopyWithImpl;
 @override @useResult
 $Res call({
- BrowserStatus status, DiscoveredServer? server, String path, List<FileEntry> files, TransferProgress? progress, List<TransferRecord> history, String errorMessage
+ BrowserStatus status, DiscoveredServer? server, String path, List<FileEntry> files, TransferProgress? progress, TransferRecord? lastTransfer, String errorMessage
 });
 
 
-@override $TransferProgressCopyWith<$Res>? get progress;
+@override $TransferProgressCopyWith<$Res>? get progress;@override $TransferRecordCopyWith<$Res>? get lastTransfer;
 
 }
 /// @nodoc
@@ -882,15 +892,15 @@ class __$BrowserStateCopyWithImpl<$Res>
 
 /// Create a copy of BrowserState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? server = freezed,Object? path = null,Object? files = null,Object? progress = freezed,Object? history = null,Object? errorMessage = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? server = freezed,Object? path = null,Object? files = null,Object? progress = freezed,Object? lastTransfer = freezed,Object? errorMessage = null,}) {
   return _then(_BrowserState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as BrowserStatus,server: freezed == server ? _self.server : server // ignore: cast_nullable_to_non_nullable
 as DiscoveredServer?,path: null == path ? _self.path : path // ignore: cast_nullable_to_non_nullable
 as String,files: null == files ? _self._files : files // ignore: cast_nullable_to_non_nullable
 as List<FileEntry>,progress: freezed == progress ? _self.progress : progress // ignore: cast_nullable_to_non_nullable
-as TransferProgress?,history: null == history ? _self._history : history // ignore: cast_nullable_to_non_nullable
-as List<TransferRecord>,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as TransferProgress?,lastTransfer: freezed == lastTransfer ? _self.lastTransfer : lastTransfer // ignore: cast_nullable_to_non_nullable
+as TransferRecord?,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -906,6 +916,18 @@ $TransferProgressCopyWith<$Res>? get progress {
 
   return $TransferProgressCopyWith<$Res>(_self.progress!, (value) {
     return _then(_self.copyWith(progress: value));
+  });
+}/// Create a copy of BrowserState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TransferRecordCopyWith<$Res>? get lastTransfer {
+    if (_self.lastTransfer == null) {
+    return null;
+  }
+
+  return $TransferRecordCopyWith<$Res>(_self.lastTransfer!, (value) {
+    return _then(_self.copyWith(lastTransfer: value));
   });
 }
 }

@@ -204,8 +204,8 @@ return $default(_that.fileName,_that.direction,_that.success,_that.timestamp,_th
 /// @nodoc
 
 
-class _TransferRecord implements TransferRecord {
-  const _TransferRecord({required this.fileName, required this.direction, required this.success, required this.timestamp, this.savedPath});
+class _TransferRecord extends TransferRecord {
+   _TransferRecord({required this.fileName, required this.direction, required this.success, required this.timestamp, this.savedPath}): super._();
   
 
 @override final  String fileName;

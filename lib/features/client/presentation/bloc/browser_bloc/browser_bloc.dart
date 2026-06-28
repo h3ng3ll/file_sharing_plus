@@ -8,6 +8,7 @@ import '../../../domain/models/transfer_progress.dart';
 import '../../../domain/models/transfer_record.dart';
 import '../../../domain/use_cases/download_file_use_case.dart';
 import '../../../domain/use_cases/list_files_use_case.dart';
+import '../../../domain/use_cases/record_transfer_use_case.dart';
 import '../../../domain/use_cases/upload_file_use_case.dart';
 import '../../../domain/use_cases/watch_files_use_case.dart';
 
@@ -21,16 +22,19 @@ class BrowserBloc extends Bloc<BrowserEvent, BrowserState> {
   final DownloadFileUseCase _downloadFileUseCase;
   final UploadFileUseCase _uploadFileUseCase;
   final WatchFilesUseCase _watchFilesUseCase;
+  final RecordTransferUseCase _recordTransferUseCase;
 
   BrowserBloc({
     required ListFilesUseCase listFilesUseCase,
     required DownloadFileUseCase downloadFileUseCase,
     required UploadFileUseCase uploadFileUseCase,
     required WatchFilesUseCase watchFilesUseCase,
+    required RecordTransferUseCase recordTransferUseCase,
   })  : _listFilesUseCase = listFilesUseCase,
         _downloadFileUseCase = downloadFileUseCase,
         _uploadFileUseCase = uploadFileUseCase,
         _watchFilesUseCase = watchFilesUseCase,
+        _recordTransferUseCase = recordTransferUseCase,
         super(const BrowserState()) {
     on<_Init>(_init);
     on<_OpenFolder>(_openFolder);
@@ -170,10 +174,10 @@ class BrowserBloc extends Bloc<BrowserEvent, BrowserState> {
     add(const BrowserEvent.loadFiles());
   }
 
-  void _transferFinished(
+  Future<void> _transferFinished(
     _TransferFinished event,
     Emitter<BrowserState> emit,
-  ) {
+  ) async {
     final record = TransferRecord(
       fileName: event.fileName,
       direction: event.direction,
@@ -181,11 +185,14 @@ class BrowserBloc extends Bloc<BrowserEvent, BrowserState> {
       timestamp: DateTime.now(),
       savedPath: event.savedPath,
     );
+    // Persist to the history store (Hive) via the use case.
+    await _recordTransferUseCase(record);
+    // Expose the just-finished transfer so the page can toast / offer sharing.
     emit(
       state.copyWith(
         progress: null,
         errorMessage: '',
-        history: [record, ...state.history].take(50).toList(),
+        lastTransfer: record,
       ),
     );
   }

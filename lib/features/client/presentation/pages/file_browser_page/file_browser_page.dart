@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../../core/di/injection.dart';
+import '../../../../../core/routes/init_router/init_router.dart';
 import '../../../../../core/services/discovery_service.dart';
 import '../../../../../core/services/file_share_service.dart';
 import '../../../../../core/services/ui_message_service.dart';
@@ -10,6 +12,7 @@ import '../../../domain/models/transfer_progress.dart';
 import '../../../domain/models/transfer_record.dart';
 import '../../bloc/browser_bloc/browser_bloc.dart';
 import 'widgets/browser_body.dart';
+import 'widgets/transfer_progress_tile.dart';
 import 'widgets/upload_button.dart';
 
 /// iOS file-browser screen for a single connected server.
@@ -38,6 +41,12 @@ class _FileBrowserPageState extends State<FileBrowserPage> {
   void dispose() {
     _bloc.close();
     super.dispose();
+  }
+
+  void _openHistory() {
+    // HistoryBloc is provided by the client ShellRoute, so the history screen
+    // resolves it from context — no bloc is passed through `extra`.
+    context.push(AppRoutes.clientBrowserHistory);
   }
 
   void _notifyTransfer(TransferRecord record) {
@@ -76,15 +85,30 @@ class _FileBrowserPageState extends State<FileBrowserPage> {
             listener: (context, state) =>
                 UiMessageService.showError(state.errorMessage),
           ),
-          // Per-transfer result, surfaced when a new history entry is added.
+          // Per-transfer result, surfaced when a transfer finishes.
           BlocListener<BrowserBloc, BrowserState>(
-            listenWhen: (p, c) => c.history.length > p.history.length,
-            listener: (context, state) => _notifyTransfer(state.history.first),
+            listenWhen: (p, c) =>
+                c.lastTransfer != null && c.lastTransfer != p.lastTransfer,
+            listener: (context, state) => _notifyTransfer(state.lastTransfer!),
           ),
         ],
         child: Scaffold(
-          appBar: CustomAppBar(title: widget.server.name),
-          body: const BrowserBody(),
+          appBar: CustomAppBar(
+            title: widget.server.name,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.history),
+                tooltip: 'Transfer history',
+                onPressed: _openHistory,
+              ),
+            ],
+          ),
+          body: const Stack(
+            children: [
+              BrowserBody(),
+              TransferProgressTile(),
+            ],
+          ),
           floatingActionButton: const UploadButton(),
         ),
       ),

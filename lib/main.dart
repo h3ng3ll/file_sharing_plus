@@ -8,6 +8,7 @@ import 'package:window_manager/window_manager.dart';
 
 import 'core/bloc/app_observer.dart';
 import 'core/di/injection.dart';
+import 'core/hive/hive_initializer.dart';
 import 'core/resources/app_theme.dart';
 import 'core/routes/init_router/init_router.dart';
 import 'core/services/ui_message_service.dart';
@@ -22,6 +23,7 @@ Future<void> main() async {
     await windowManager.setMinimumSize(const Size(900.0, 600.0));
   }
 
+  await initHive();
   await initDependencies();
   Bloc.observer = const AppObserver();
   runApp(const MyApp());

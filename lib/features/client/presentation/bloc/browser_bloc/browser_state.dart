@@ -23,7 +23,10 @@ sealed class BrowserState with _$BrowserState {
     @Default('') String path,
     @Default(<FileEntry>[]) List<FileEntry> files,
     TransferProgress? progress,
-    @Default(<TransferRecord>[]) List<TransferRecord> history,
+
+    /// The most recently finished transfer (drives the per-transfer toast and
+    /// the optional Save-to-Files prompt). History itself lives in HistoryBloc.
+    TransferRecord? lastTransfer,
     @Default('') String errorMessage,
   }) = _BrowserState;
 }
