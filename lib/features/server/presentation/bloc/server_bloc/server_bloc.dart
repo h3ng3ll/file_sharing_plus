@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 import '../../../../../core/models/file_entry/file_entry.dart';
 import '../../../domain/models/activity_log_entry.dart';
 import '../../../domain/models/connected_device.dart';
+import '../../../domain/use_cases/persist_port_use_case.dart';
 import '../../../domain/use_cases/persist_shared_folder_use_case.dart';
 import '../../../domain/use_cases/select_folder_use_case.dart';
 import '../../../domain/use_cases/server_session_use_case.dart';
@@ -24,6 +25,7 @@ class ServerBloc extends Bloc<ServerEvent, ServerState> {
   final StopServerUseCase _stopServerUseCase;
   final SelectFolderUseCase _selectFolderUseCase;
   final PersistSharedFolderUseCase _persistSharedFolderUseCase;
+  final PersistPortUseCase _persistPortUseCase;
 
   ServerBloc({
     required ServerSessionUseCase serverSessionUseCase,
@@ -31,16 +33,19 @@ class ServerBloc extends Bloc<ServerEvent, ServerState> {
     required StopServerUseCase stopServerUseCase,
     required SelectFolderUseCase selectFolderUseCase,
     required PersistSharedFolderUseCase persistSharedFolderUseCase,
+    required PersistPortUseCase persistPortUseCase,
   })  : _serverSessionUseCase = serverSessionUseCase,
         _startServerUseCase = startServerUseCase,
         _stopServerUseCase = stopServerUseCase,
         _selectFolderUseCase = selectFolderUseCase,
         _persistSharedFolderUseCase = persistSharedFolderUseCase,
+        _persistPortUseCase = persistPortUseCase,
         super(const ServerState()) {
     on<_Init>(_init);
     on<_StartServer>(_startServer);
     on<_StopServer>(_stopServer);
     on<_SelectFolder>(_selectFolder);
+    on<_PortChanged>(_portChanged);
     on<_DevicesUpdated>(_devicesUpdated);
     on<_LogReceived>(_logReceived);
     on<_RefreshFiles>(_refreshFiles);
@@ -53,6 +58,12 @@ class ServerBloc extends Bloc<ServerEvent, ServerState> {
     _serverSessionUseCase.activityLog.listen(
       (entry) => add(ServerEvent.logReceived(entry)),
     );
+
+    // Restore the previously saved sharing port, if any.
+    final savedPort = _persistPortUseCase.read();
+    if (savedPort != null) {
+      emit(state.copyWith(port: savedPort));
+    }
 
     // Restore the previously selected shared folder, if any.
     final saved = _persistSharedFolderUseCase.read();
@@ -160,6 +171,17 @@ class ServerBloc extends Bloc<ServerEvent, ServerState> {
       // Cancellation (SelectFolderCancelledFailure) → no-op.
       (failure) async {},
     );
+  }
+
+  Future<void> _portChanged(
+    _PortChanged event,
+    Emitter<ServerState> emit,
+  ) async {
+    // The port only takes effect on the next start; block changes while
+    // running so a live server keeps its bound port.
+    if (state.isRunning || state.isStarting) return;
+    await _persistPortUseCase.save(event.port);
+    emit(state.copyWith(port: event.port));
   }
 
   Future<void> _refreshFiles(

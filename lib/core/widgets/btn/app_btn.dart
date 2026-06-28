@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 
 import '../../resources/colors/app_colors.dart';
@@ -51,10 +52,15 @@ class PrimaryBtn extends StatelessWidget {
                   ),
                   const SizedBox(width: 8.0),
                 ],
-                Text(
-                  text,
-                  style: AppTextStyle.semibold16.value.copyWith(
-                    color: AppColors.onPrimary.value,
+                Flexible(
+                  child: AutoSizeText(
+                    text,
+                    maxLines: 1,
+                    minFontSize: 10.0,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyle.semibold16.value.copyWith(
+                      color: AppColors.onPrimary.value,
+                    ),
                   ),
                 ),
               ],

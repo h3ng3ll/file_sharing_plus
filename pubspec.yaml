@@ -52,11 +52,15 @@ dependencies:
   # Spacing helper
   gap: ^3.0.1
 
+  # Shrink-to-fit text
+  auto_size_text: ^3.0.0
+
   # Responsive layout breakpoints
   responsive_framework: ^1.5.1
 
   # Desktop window control (minimum size)
   window_manager: ^0.4.3
+  gpt_markdown: ^1.1.7
 
 dev_dependencies:
   flutter_test:
@@ -73,3 +77,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/data/

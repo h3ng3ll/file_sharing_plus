@@ -20,7 +20,9 @@ Future<void> main() async {
   // when the window is shrunk. Not applicable on mobile.
   if (!kIsWeb && (Platform.isMacOS || Platform.isWindows || Platform.isLinux)) {
     await windowManager.ensureInitialized();
-    await windowManager.setMinimumSize(const Size(900.0, 600.0));
+    // Fits one column (Server card + single-column Shared Files) at its minimum
+    // width; the layout collapses to a single stacked column at this size.
+    await windowManager.setMinimumSize(const Size(420.0, 600.0));
   }
 
   await initHive();

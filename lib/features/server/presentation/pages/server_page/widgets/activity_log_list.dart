@@ -7,7 +7,13 @@ import '../../../../../../core/widgets/section_card.dart';
 import '../../../../domain/models/activity_log_entry.dart';
 import '../../../bloc/server_bloc/server_bloc.dart';
 
+/// Fixed height of the scrollable log area, so the card never grows unbounded.
+const double _logHeight = 320.0;
+
 /// Scrolling list of server activity, newest first.
+///
+/// The log has a fixed height and scrolls internally rather than expanding the
+/// card as entries accumulate.
 class ActivityLogList extends StatelessWidget {
   const ActivityLogList({super.key});
 
@@ -24,10 +30,13 @@ class ActivityLogList extends StatelessWidget {
                     color: AppColors.textSecondary.value,
                   ),
                 )
-              : Column(
-                  children: state.log
-                      .map((entry) => _LogTile(entry: entry))
-                      .toList(),
+              : SizedBox(
+                  height: _logHeight,
+                  child: ListView.builder(
+                    itemCount: state.log.length,
+                    itemBuilder: (context, index) =>
+                        _LogTile(entry: state.log[index]),
+                  ),
                 ),
         );
       },

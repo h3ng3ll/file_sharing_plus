@@ -7,6 +7,7 @@ import 'package:file_sharing/core/hive/hive_adapters.dart';
 
 extension HiveRegistrar on HiveInterface {
   void registerAdapters() {
+    registerAdapter(ServerSettingsAdapter());
     registerAdapter(SharedFolderAdapter());
     registerAdapter(TransferDirectionAdapter());
     registerAdapter(TransferRecordAdapter());
@@ -15,6 +16,7 @@ extension HiveRegistrar on HiveInterface {
 
 extension IsolatedHiveRegistrar on IsolatedHiveInterface {
   void registerAdapters() {
+    registerAdapter(ServerSettingsAdapter());
     registerAdapter(SharedFolderAdapter());
     registerAdapter(TransferDirectionAdapter());
     registerAdapter(TransferRecordAdapter());

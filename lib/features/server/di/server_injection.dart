@@ -3,11 +3,15 @@ import 'package:hive_ce/hive.dart';
 
 import '../../../core/services/discovery_service.dart';
 import '../../../core/services/network_info_service.dart';
+import '../data/repositories/hive_server_settings_repository.dart';
 import '../data/repositories/hive_shared_folder_repository.dart';
 import '../data/repositories/http_server_repository.dart';
+import '../domain/models/server_settings.dart';
 import '../domain/models/shared_folder.dart';
 import '../domain/repositories/i_server_repository.dart';
+import '../domain/repositories/i_server_settings_repository.dart';
 import '../domain/repositories/i_shared_folder_repository.dart';
+import '../domain/use_cases/persist_port_use_case.dart';
 import '../domain/use_cases/persist_shared_folder_use_case.dart';
 import '../domain/use_cases/select_folder_use_case.dart';
 import '../domain/use_cases/server_session_use_case.dart';
@@ -23,6 +27,11 @@ void initServerFeature(GetIt getIt) {
   getIt.registerLazySingleton<ISharedFolderRepository>(
     () => HiveSharedFolderRepository(
       box: getIt<Box<SharedFolder>>(),
+    ),
+  );
+  getIt.registerLazySingleton<IServerSettingsRepository>(
+    () => HiveServerSettingsRepository(
+      box: getIt<Box<ServerSettings>>(),
     ),
   );
 
@@ -52,6 +61,11 @@ void initServerFeature(GetIt getIt) {
       sharedFolderRepository: getIt<ISharedFolderRepository>(),
     ),
   );
+  getIt.registerFactory(
+    () => PersistPortUseCase(
+      serverSettingsRepository: getIt<IServerSettingsRepository>(),
+    ),
+  );
 
   getIt.registerFactory<ServerBloc>(
     () => ServerBloc(
@@ -60,6 +74,7 @@ void initServerFeature(GetIt getIt) {
       stopServerUseCase: getIt<StopServerUseCase>(),
       selectFolderUseCase: getIt<SelectFolderUseCase>(),
       persistSharedFolderUseCase: getIt<PersistSharedFolderUseCase>(),
+      persistPortUseCase: getIt<PersistPortUseCase>(),
     ),
   );
 }

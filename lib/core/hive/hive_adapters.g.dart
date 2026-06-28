@@ -120,3 +120,35 @@ class SharedFolderAdapter extends TypeAdapter<SharedFolder> {
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
+
+class ServerSettingsAdapter extends TypeAdapter<ServerSettings> {
+  @override
+  final typeId = 3;
+
+  @override
+  ServerSettings read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return ServerSettings(port: (fields[0] as num).toInt());
+  }
+
+  @override
+  void write(BinaryWriter writer, ServerSettings obj) {
+    writer
+      ..writeByte(1)
+      ..writeByte(0)
+      ..write(obj.port);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ServerSettingsAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}

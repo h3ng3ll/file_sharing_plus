@@ -55,14 +55,15 @@ extension ServerEventPatterns on ServerEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Init value)?  init,TResult Function( _StartServer value)?  startServer,TResult Function( _StopServer value)?  stopServer,TResult Function( _SelectFolder value)?  selectFolder,TResult Function( _RefreshFiles value)?  refreshFiles,TResult Function( _DevicesUpdated value)?  devicesUpdated,TResult Function( _LogReceived value)?  logReceived,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Init value)?  init,TResult Function( _StartServer value)?  startServer,TResult Function( _StopServer value)?  stopServer,TResult Function( _SelectFolder value)?  selectFolder,TResult Function( _PortChanged value)?  portChanged,TResult Function( _RefreshFiles value)?  refreshFiles,TResult Function( _DevicesUpdated value)?  devicesUpdated,TResult Function( _LogReceived value)?  logReceived,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Init() when init != null:
 return init(_that);case _StartServer() when startServer != null:
 return startServer(_that);case _StopServer() when stopServer != null:
 return stopServer(_that);case _SelectFolder() when selectFolder != null:
-return selectFolder(_that);case _RefreshFiles() when refreshFiles != null:
+return selectFolder(_that);case _PortChanged() when portChanged != null:
+return portChanged(_that);case _RefreshFiles() when refreshFiles != null:
 return refreshFiles(_that);case _DevicesUpdated() when devicesUpdated != null:
 return devicesUpdated(_that);case _LogReceived() when logReceived != null:
 return logReceived(_that);case _:
@@ -83,14 +84,15 @@ return logReceived(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Init value)  init,required TResult Function( _StartServer value)  startServer,required TResult Function( _StopServer value)  stopServer,required TResult Function( _SelectFolder value)  selectFolder,required TResult Function( _RefreshFiles value)  refreshFiles,required TResult Function( _DevicesUpdated value)  devicesUpdated,required TResult Function( _LogReceived value)  logReceived,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Init value)  init,required TResult Function( _StartServer value)  startServer,required TResult Function( _StopServer value)  stopServer,required TResult Function( _SelectFolder value)  selectFolder,required TResult Function( _PortChanged value)  portChanged,required TResult Function( _RefreshFiles value)  refreshFiles,required TResult Function( _DevicesUpdated value)  devicesUpdated,required TResult Function( _LogReceived value)  logReceived,}){
 final _that = this;
 switch (_that) {
 case _Init():
 return init(_that);case _StartServer():
 return startServer(_that);case _StopServer():
 return stopServer(_that);case _SelectFolder():
-return selectFolder(_that);case _RefreshFiles():
+return selectFolder(_that);case _PortChanged():
+return portChanged(_that);case _RefreshFiles():
 return refreshFiles(_that);case _DevicesUpdated():
 return devicesUpdated(_that);case _LogReceived():
 return logReceived(_that);}
@@ -107,14 +109,15 @@ return logReceived(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Init value)?  init,TResult? Function( _StartServer value)?  startServer,TResult? Function( _StopServer value)?  stopServer,TResult? Function( _SelectFolder value)?  selectFolder,TResult? Function( _RefreshFiles value)?  refreshFiles,TResult? Function( _DevicesUpdated value)?  devicesUpdated,TResult? Function( _LogReceived value)?  logReceived,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Init value)?  init,TResult? Function( _StartServer value)?  startServer,TResult? Function( _StopServer value)?  stopServer,TResult? Function( _SelectFolder value)?  selectFolder,TResult? Function( _PortChanged value)?  portChanged,TResult? Function( _RefreshFiles value)?  refreshFiles,TResult? Function( _DevicesUpdated value)?  devicesUpdated,TResult? Function( _LogReceived value)?  logReceived,}){
 final _that = this;
 switch (_that) {
 case _Init() when init != null:
 return init(_that);case _StartServer() when startServer != null:
 return startServer(_that);case _StopServer() when stopServer != null:
 return stopServer(_that);case _SelectFolder() when selectFolder != null:
-return selectFolder(_that);case _RefreshFiles() when refreshFiles != null:
+return selectFolder(_that);case _PortChanged() when portChanged != null:
+return portChanged(_that);case _RefreshFiles() when refreshFiles != null:
 return refreshFiles(_that);case _DevicesUpdated() when devicesUpdated != null:
 return devicesUpdated(_that);case _LogReceived() when logReceived != null:
 return logReceived(_that);case _:
@@ -134,13 +137,14 @@ return logReceived(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  init,TResult Function()?  startServer,TResult Function()?  stopServer,TResult Function()?  selectFolder,TResult Function()?  refreshFiles,TResult Function( List<ConnectedDevice> devices)?  devicesUpdated,TResult Function( ActivityLogEntry entry)?  logReceived,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  init,TResult Function()?  startServer,TResult Function()?  stopServer,TResult Function()?  selectFolder,TResult Function( int port)?  portChanged,TResult Function()?  refreshFiles,TResult Function( List<ConnectedDevice> devices)?  devicesUpdated,TResult Function( ActivityLogEntry entry)?  logReceived,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Init() when init != null:
 return init();case _StartServer() when startServer != null:
 return startServer();case _StopServer() when stopServer != null:
 return stopServer();case _SelectFolder() when selectFolder != null:
-return selectFolder();case _RefreshFiles() when refreshFiles != null:
+return selectFolder();case _PortChanged() when portChanged != null:
+return portChanged(_that.port);case _RefreshFiles() when refreshFiles != null:
 return refreshFiles();case _DevicesUpdated() when devicesUpdated != null:
 return devicesUpdated(_that.devices);case _LogReceived() when logReceived != null:
 return logReceived(_that.entry);case _:
@@ -161,13 +165,14 @@ return logReceived(_that.entry);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  init,required TResult Function()  startServer,required TResult Function()  stopServer,required TResult Function()  selectFolder,required TResult Function()  refreshFiles,required TResult Function( List<ConnectedDevice> devices)  devicesUpdated,required TResult Function( ActivityLogEntry entry)  logReceived,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  init,required TResult Function()  startServer,required TResult Function()  stopServer,required TResult Function()  selectFolder,required TResult Function( int port)  portChanged,required TResult Function()  refreshFiles,required TResult Function( List<ConnectedDevice> devices)  devicesUpdated,required TResult Function( ActivityLogEntry entry)  logReceived,}) {final _that = this;
 switch (_that) {
 case _Init():
 return init();case _StartServer():
 return startServer();case _StopServer():
 return stopServer();case _SelectFolder():
-return selectFolder();case _RefreshFiles():
+return selectFolder();case _PortChanged():
+return portChanged(_that.port);case _RefreshFiles():
 return refreshFiles();case _DevicesUpdated():
 return devicesUpdated(_that.devices);case _LogReceived():
 return logReceived(_that.entry);}
@@ -184,13 +189,14 @@ return logReceived(_that.entry);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  init,TResult? Function()?  startServer,TResult? Function()?  stopServer,TResult? Function()?  selectFolder,TResult? Function()?  refreshFiles,TResult? Function( List<ConnectedDevice> devices)?  devicesUpdated,TResult? Function( ActivityLogEntry entry)?  logReceived,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  init,TResult? Function()?  startServer,TResult? Function()?  stopServer,TResult? Function()?  selectFolder,TResult? Function( int port)?  portChanged,TResult? Function()?  refreshFiles,TResult? Function( List<ConnectedDevice> devices)?  devicesUpdated,TResult? Function( ActivityLogEntry entry)?  logReceived,}) {final _that = this;
 switch (_that) {
 case _Init() when init != null:
 return init();case _StartServer() when startServer != null:
 return startServer();case _StopServer() when stopServer != null:
 return stopServer();case _SelectFolder() when selectFolder != null:
-return selectFolder();case _RefreshFiles() when refreshFiles != null:
+return selectFolder();case _PortChanged() when portChanged != null:
+return portChanged(_that.port);case _RefreshFiles() when refreshFiles != null:
 return refreshFiles();case _DevicesUpdated() when devicesUpdated != null:
 return devicesUpdated(_that.devices);case _LogReceived() when logReceived != null:
 return logReceived(_that.entry);case _:
@@ -328,6 +334,72 @@ String toString() {
 
 
 
+
+/// @nodoc
+
+
+class _PortChanged implements ServerEvent {
+  const _PortChanged(this.port);
+  
+
+ final  int port;
+
+/// Create a copy of ServerEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$PortChangedCopyWith<_PortChanged> get copyWith => __$PortChangedCopyWithImpl<_PortChanged>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PortChanged&&(identical(other.port, port) || other.port == port));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,port);
+
+@override
+String toString() {
+  return 'ServerEvent.portChanged(port: $port)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$PortChangedCopyWith<$Res> implements $ServerEventCopyWith<$Res> {
+  factory _$PortChangedCopyWith(_PortChanged value, $Res Function(_PortChanged) _then) = __$PortChangedCopyWithImpl;
+@useResult
+$Res call({
+ int port
+});
+
+
+
+
+}
+/// @nodoc
+class __$PortChangedCopyWithImpl<$Res>
+    implements _$PortChangedCopyWith<$Res> {
+  __$PortChangedCopyWithImpl(this._self, this._then);
+
+  final _PortChanged _self;
+  final $Res Function(_PortChanged) _then;
+
+/// Create a copy of ServerEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? port = null,}) {
+  return _then(_PortChanged(
+null == port ? _self.port : port // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
 
 /// @nodoc
 

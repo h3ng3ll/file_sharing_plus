@@ -1,6 +1,7 @@
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
 import '../../features/client/domain/models/transfer_record.dart';
+import '../../features/server/domain/models/server_settings.dart';
 import '../../features/server/domain/models/shared_folder.dart';
 import '../di/injection.dart';
 import 'hive_registrar.g.dart';
@@ -10,6 +11,9 @@ const String transferHistoryBoxName = 'transfer_history';
 
 /// Box that persists the server's selected shared folder.
 const String sharedFolderBoxName = 'shared_folder';
+
+/// Box that persists the server's settings (e.g. the sharing port).
+const String serverSettingsBoxName = 'server_settings';
 
 /// Initializes Hive, registers the generated adapters, opens the app boxes and
 /// registers them in [getIt].
@@ -29,4 +33,9 @@ Future<void> initHive() async {
     sharedFolderBoxName,
   );
   getIt.registerSingleton<Box<SharedFolder>>(sharedFolderBox);
+
+  final serverSettingsBox = await Hive.openBox<ServerSettings>(
+    serverSettingsBoxName,
+  );
+  getIt.registerSingleton<Box<ServerSettings>>(serverSettingsBox);
 }

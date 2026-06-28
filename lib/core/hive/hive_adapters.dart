@@ -2,6 +2,7 @@ import 'package:hive_ce/hive_ce.dart';
 
 import '../../features/client/domain/models/transfer_progress.dart';
 import '../../features/client/domain/models/transfer_record.dart';
+import '../../features/server/domain/models/server_settings.dart';
 import '../../features/server/domain/models/shared_folder.dart';
 
 part 'hive_adapters.g.dart';
@@ -14,5 +15,6 @@ part 'hive_adapters.g.dart';
   AdapterSpec<TransferRecord>(),
   AdapterSpec<TransferDirection>(),
   AdapterSpec<SharedFolder>(),
+  AdapterSpec<ServerSettings>(),
 ])
 class HiveAdapters {}

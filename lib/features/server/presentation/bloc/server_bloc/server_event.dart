@@ -8,6 +8,7 @@ sealed class ServerEvent with _$ServerEvent {
   const factory ServerEvent.startServer() = _StartServer;
   const factory ServerEvent.stopServer() = _StopServer;
   const factory ServerEvent.selectFolder() = _SelectFolder;
+  const factory ServerEvent.portChanged(int port) = _PortChanged;
   const factory ServerEvent.refreshFiles() = _RefreshFiles;
 
   const factory ServerEvent.devicesUpdated(List<ConnectedDevice> devices) =
