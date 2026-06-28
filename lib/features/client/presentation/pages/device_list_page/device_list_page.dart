@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/di/injection.dart';
+import '../../../../../core/routes/init_router/init_router.dart';
 import '../../../../../core/services/discovery_service.dart';
 import '../../../../../core/widgets/custom_app_bar.dart';
 import '../../bloc/discovery_bloc/discovery_bloc.dart';
@@ -56,6 +57,11 @@ class _DeviceListPageState extends State<DeviceListPage> {
         appBar: CustomAppBar(
           title: 'Available Devices',
           actions: [
+            IconButton(
+              icon: const Icon(Icons.info_outline),
+              tooltip: 'How to use',
+              onPressed: () => context.push(AppRoutes.clientInfo),
+            ),
             IconButton(
               icon: const Icon(Icons.add),
               tooltip: 'Add manually',

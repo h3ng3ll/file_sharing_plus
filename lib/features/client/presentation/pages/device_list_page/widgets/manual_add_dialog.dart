@@ -55,7 +55,7 @@ class _ManualAddDialogState extends State<ManualAddDialog> {
                 labelText: 'IP address',
                 hintText: '192.168.0.10',
               ),
-              keyboardType: TextInputType.number,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
               validator: (value) =>
                   (value == null || value.trim().isEmpty) ? 'Required' : null,
             ),
