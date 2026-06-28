@@ -61,11 +61,20 @@ dependencies:
   # Desktop window control (minimum size)
   window_manager: ^0.4.3
   gpt_markdown: ^1.1.7
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+
+  # On-device screenshot capture harness (marketing screenshots).
+  integration_test:
+    sdk: flutter
+
+  # Fake blocs that emit fixed seeded states for the screenshot harness.
+  bloc_test: ^10.0.0
+  mocktail: ^1.0.4
 
   # StreamQueue, used in integration tests.
   async: ^2.11.0
