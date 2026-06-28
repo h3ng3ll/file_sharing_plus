@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../../core/di/injection.dart';
 import '../../../../../core/routes/init_router/init_router.dart';
 import '../../../../../core/services/discovery_service.dart';
+import '../../../../../core/services/ui_message_service.dart';
 import '../../../../../core/widgets/custom_app_bar.dart';
 import '../../bloc/discovery_bloc/discovery_bloc.dart';
 import 'widgets/device_list_view.dart';
@@ -53,9 +54,13 @@ class _DeviceListPageState extends State<DeviceListPage> {
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _bloc,
-      child: Scaffold(
-        appBar: CustomAppBar(
-          title: 'Available Devices',
+      child: BlocListener<DiscoveryBloc, DiscoveryState>(
+        listenWhen: (p, c) => p.status != c.status && c.isFailure,
+        listener: (context, state) =>
+            UiMessageService.showError(state.errorMessage),
+        child: Scaffold(
+          appBar: CustomAppBar(
+            title: 'Available Devices',
           actions: [
             IconButton(
               icon: const Icon(Icons.info_outline),
@@ -69,7 +74,8 @@ class _DeviceListPageState extends State<DeviceListPage> {
             ),
           ],
         ),
-        body: DeviceListView(onTapServer: _onTapServer),
+          body: DeviceListView(onTapServer: _onTapServer),
+        ),
       ),
     );
   }

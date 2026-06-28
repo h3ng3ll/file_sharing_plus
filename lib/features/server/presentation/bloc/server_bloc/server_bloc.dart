@@ -128,18 +128,37 @@ class ServerBloc extends Bloc<ServerEvent, ServerState> {
     final folder = state.sharedFolder;
     if (folder == null) return;
 
-    final entries = <FileEntry>[];
-    await for (final entity in Directory(folder).list(followLinks: false)) {
-      final isDir = entity is Directory;
-      entries.add(
-        FileEntry(
-          name: p.basename(entity.path),
-          isDirectory: isDir,
-          size: isDir ? 0 : (entity as File).lengthSync(),
+    try {
+      final entries = <FileEntry>[];
+      await for (final entity in Directory(folder).list(followLinks: false)) {
+        entries.add(
+          FileEntry(
+            name: p.basename(entity.path),
+            isDirectory: entity is Directory,
+            size: _entrySize(entity),
+          ),
+        );
+      }
+      emit(state.copyWith(files: entries));
+    } catch (_) {
+      emit(
+        state.copyWith(
+          status: ServerStatus.failure,
+          errorMessage: 'Failed to read the shared folder',
         ),
       );
     }
-    emit(state.copyWith(files: entries));
+  }
+
+  /// Size in bytes for a directory entry. Returns 0 for directories, symlinks
+  /// ([Link]) and any entry whose length cannot be read.
+  int _entrySize(FileSystemEntity entity) {
+    if (entity is! File) return 0;
+    try {
+      return entity.lengthSync();
+    } catch (_) {
+      return 0;
+    }
   }
 
   void _devicesUpdated(_DevicesUpdated event, Emitter<ServerState> emit) {

@@ -148,12 +148,11 @@ class HttpServerRepository implements IServerRepository {
 
     final entries = <FileEntry>[];
     await for (final entity in dir.list(followLinks: false)) {
-      final isDir = entity is Directory;
       entries.add(
         FileEntry(
           name: p.basename(entity.path),
-          isDirectory: isDir,
-          size: isDir ? 0 : (entity as File).lengthSync(),
+          isDirectory: entity is Directory,
+          size: _entrySize(entity),
         ),
       );
     }
@@ -164,6 +163,17 @@ class HttpServerRepository implements IServerRepository {
       return a.name.toLowerCase().compareTo(b.name.toLowerCase());
     });
     return entries;
+  }
+
+  /// Size in bytes for a directory entry. Returns 0 for directories, symlinks
+  /// ([Link]) and any entry whose length cannot be read.
+  int _entrySize(FileSystemEntity entity) {
+    if (entity is! File) return 0;
+    try {
+      return entity.lengthSync();
+    } catch (_) {
+      return 0;
+    }
   }
 
   Future<void> _handleDownload(HttpRequest request) async {

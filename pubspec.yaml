@@ -45,6 +45,12 @@ dependencies:
   # Spacing helper
   gap: ^3.0.1
 
+  # Responsive layout breakpoints
+  responsive_framework: ^1.5.1
+
+  # Desktop window control (minimum size)
+  window_manager: ^0.4.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

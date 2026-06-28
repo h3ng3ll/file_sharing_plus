@@ -3,7 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/di/injection.dart';
 import '../../../../../core/services/discovery_service.dart';
+import '../../../../../core/services/ui_message_service.dart';
 import '../../../../../core/widgets/custom_app_bar.dart';
+import '../../../domain/models/transfer_progress.dart';
+import '../../../domain/models/transfer_record.dart';
 import '../../bloc/browser_bloc/browser_bloc.dart';
 import 'widgets/browser_body.dart';
 import 'widgets/upload_button.dart';
@@ -36,14 +39,39 @@ class _FileBrowserPageState extends State<FileBrowserPage> {
     super.dispose();
   }
 
+  void _notifyTransfer(TransferRecord record) {
+    final verb =
+        record.direction == TransferDirection.download ? 'Download' : 'Upload';
+    if (record.success) {
+      UiMessageService.showSuccess('$verb complete: ${record.fileName}');
+    } else {
+      UiMessageService.showError('$verb failed: ${record.fileName}');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _bloc,
-      child: Scaffold(
-        appBar: CustomAppBar(title: widget.server.name),
-        body: const BrowserBody(),
-        floatingActionButton: const UploadButton(),
+      child: MultiBlocListener(
+        listeners: [
+          // File-listing failures.
+          BlocListener<BrowserBloc, BrowserState>(
+            listenWhen: (p, c) => p.status != c.status && c.isFailure,
+            listener: (context, state) =>
+                UiMessageService.showError(state.errorMessage),
+          ),
+          // Per-transfer result, surfaced when a new history entry is added.
+          BlocListener<BrowserBloc, BrowserState>(
+            listenWhen: (p, c) => c.history.length > p.history.length,
+            listener: (context, state) => _notifyTransfer(state.history.first),
+          ),
+        ],
+        child: Scaffold(
+          appBar: CustomAppBar(title: widget.server.name),
+          body: const BrowserBody(),
+          floatingActionButton: const UploadButton(),
+        ),
       ),
     );
   }

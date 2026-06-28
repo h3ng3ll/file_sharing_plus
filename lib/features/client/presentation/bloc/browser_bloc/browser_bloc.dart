@@ -62,9 +62,15 @@ class BrowserBloc extends Bloc<BrowserEvent, BrowserState> {
   ) async {
     await emit.forEach<List<FileEntry>>(
       _watchFilesUseCase.files,
-      onData: (files) =>
-          state.copyWith(status: BrowserStatus.loaded, files: files),
-      onError: (_, _) => state,
+      onData: (files) => state.copyWith(
+        status: BrowserStatus.loaded,
+        files: files,
+        errorMessage: '',
+      ),
+      // Keep the last good listing visible, but surface that the live
+      // connection dropped so a listener can notify the user.
+      onError: (_, _) =>
+          state.copyWith(errorMessage: 'Live updates disconnected'),
     );
   }
 

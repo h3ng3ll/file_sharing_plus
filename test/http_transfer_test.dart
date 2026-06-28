@@ -105,6 +105,19 @@ void main() {
     });
   });
 
+  test('listFiles tolerates symlinks in the shared folder', () {
+    return _withRealHttp(() async {
+      // A symlink lists as a Link (not File/Directory); listing must not throw.
+      Link(p.join(sharedDir.path, 'shortcut'))
+          .createSync(p.join(sharedDir.path, 'hello.txt'));
+
+      final result = await client.listFiles(server: device);
+      final names = result.map((f) => f.name);
+      expect(names, contains('hello.txt'));
+      expect(names, contains('shortcut'));
+    });
+  });
+
   test('watchFiles pushes listings over the WebSocket on change', () {
     return _withRealHttp(() async {
       final watch = client.watchFiles(server: device);

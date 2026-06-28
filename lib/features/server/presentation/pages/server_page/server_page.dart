@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/di/injection.dart';
+import '../../../../../core/services/ui_message_service.dart';
 import '../../../../../core/widgets/custom_app_bar.dart';
 import '../../../../../core/widgets/padding/horizontal_padding.dart';
 import '../../bloc/server_bloc/server_bloc.dart';
-import 'widgets/activity_log_list.dart';
-import 'widgets/connected_devices_list.dart';
-import 'widgets/server_controls.dart';
-import 'widgets/shared_files_list.dart';
+import 'widgets/server_lists_layout.dart';
 
 /// macOS server screen.
 class ServerPage extends StatefulWidget {
@@ -37,22 +35,23 @@ class _ServerPageState extends State<ServerPage> {
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _bloc,
-      child: const Scaffold(
-        appBar: CustomAppBar(title: 'File Sharing — Server'),
-        body: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(vertical: 16.0),
-          child: HorizontalPadding(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                ServerControls(),
-                SizedBox(height: 24.0),
-                SharedFilesList(),
-                SizedBox(height: 24.0),
-                ConnectedDevicesList(),
-                SizedBox(height: 24.0),
-                ActivityLogList(),
-              ],
+      child: BlocListener<ServerBloc, ServerState>(
+        listenWhen: (p, c) => p.status != c.status,
+        listener: (context, state) {
+          if (state.isFailure) {
+            UiMessageService.showError(state.errorMessage);
+          } else if (state.isRunning) {
+            UiMessageService.showSuccess('Server started');
+          } else if (state.isStopped) {
+            UiMessageService.showSuccess('Server stopped');
+          }
+        },
+        child: const Scaffold(
+          appBar: CustomAppBar(title: 'File Sharing — Server'),
+          body: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(vertical: 16.0),
+            child: HorizontalPadding(
+              child: ServerListsLayout(),
             ),
           ),
         ),

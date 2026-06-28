@@ -4,11 +4,17 @@ PODS:
   - FlutterMacOS (1.0.0)
   - nsd_macos (0.0.1):
     - FlutterMacOS
+  - screen_retriever_macos (0.0.1):
+    - FlutterMacOS
+  - window_manager (0.2.0):
+    - FlutterMacOS
 
 DEPENDENCIES:
   - file_picker (from `Flutter/ephemeral/.symlinks/plugins/file_picker/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
   - nsd_macos (from `Flutter/ephemeral/.symlinks/plugins/nsd_macos/macos`)
+  - screen_retriever_macos (from `Flutter/ephemeral/.symlinks/plugins/screen_retriever_macos/macos`)
+  - window_manager (from `Flutter/ephemeral/.symlinks/plugins/window_manager/macos`)
 
 EXTERNAL SOURCES:
   file_picker:
@@ -17,11 +23,17 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral
   nsd_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/nsd_macos/macos
+  screen_retriever_macos:
+    :path: Flutter/ephemeral/.symlinks/plugins/screen_retriever_macos/macos
+  window_manager:
+    :path: Flutter/ephemeral/.symlinks/plugins/window_manager/macos
 
 SPEC CHECKSUMS:
   file_picker: e716a70a9fe5fd9e09ebc922d7541464289443af
   FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
   nsd_macos: 1a38a38a33adbb396b4c6f303bc076073514cadc
+  screen_retriever_macos: 038d3f7b34a779b06f536842003e41e8ec1fb4b7
+  window_manager: 3a1844359a6295ab1e47659b1a777e36773cd6e8
 
 PODFILE CHECKSUM: 54d867c82ac51cbd61b565781b9fada492027009
 
