@@ -31,7 +31,12 @@ class ServerControls extends StatelessWidget {
               ),
               _InfoRow(
                 label: 'Shared folder',
-                value: state.sharedFolder ?? 'Not selected',
+                value: state.sharedFolder == null
+                    ? 'Not selected'
+                    : state.sharedFolderMissing
+                        ? '${state.sharedFolder} (missing — choose a new folder)'
+                        : state.sharedFolder!,
+                isError: state.sharedFolderMissing,
               ),
               const SizedBox(height: 16.0),
               Row(
@@ -122,8 +127,13 @@ class _StatusRow extends StatelessWidget {
 class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
+  final bool isError;
 
-  const _InfoRow({required this.label, required this.value});
+  const _InfoRow({
+    required this.label,
+    required this.value,
+    this.isError = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -145,7 +155,9 @@ class _InfoRow extends StatelessWidget {
             child: Text(
               value,
               style: AppTextStyle.medium14.value.copyWith(
-                color: AppColors.textPrimary.value,
+                color: isError
+                    ? AppColors.danger.value
+                    : AppColors.textPrimary.value,
               ),
             ),
           ),

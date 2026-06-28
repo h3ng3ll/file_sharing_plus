@@ -22,6 +22,10 @@ sealed class ServerState with _$ServerState {
     @Default(8080) int port,
     String? ipAddress,
     String? sharedFolder,
+
+    /// True when [sharedFolder] is set but no longer exists on disk (e.g. it
+    /// was moved/deleted since it was saved).
+    @Default(false) bool sharedFolderMissing,
     @Default(<FileEntry>[]) List<FileEntry> files,
     @Default(<ConnectedDevice>[]) List<ConnectedDevice> devices,
     @Default(<ActivityLogEntry>[]) List<ActivityLogEntry> log,

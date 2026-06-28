@@ -88,3 +88,35 @@ class TransferDirectionAdapter extends TypeAdapter<TransferDirection> {
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
+
+class SharedFolderAdapter extends TypeAdapter<SharedFolder> {
+  @override
+  final typeId = 2;
+
+  @override
+  SharedFolder read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return SharedFolder(path: fields[0] as String);
+  }
+
+  @override
+  void write(BinaryWriter writer, SharedFolder obj) {
+    writer
+      ..writeByte(1)
+      ..writeByte(0)
+      ..write(obj.path);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SharedFolderAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}

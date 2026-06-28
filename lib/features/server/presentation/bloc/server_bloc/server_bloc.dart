@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 import '../../../../../core/models/file_entry/file_entry.dart';
 import '../../../domain/models/activity_log_entry.dart';
 import '../../../domain/models/connected_device.dart';
+import '../../../domain/use_cases/persist_shared_folder_use_case.dart';
 import '../../../domain/use_cases/select_folder_use_case.dart';
 import '../../../domain/use_cases/server_session_use_case.dart';
 import '../../../domain/use_cases/start_server_use_case.dart';
@@ -22,16 +23,19 @@ class ServerBloc extends Bloc<ServerEvent, ServerState> {
   final StartServerUseCase _startServerUseCase;
   final StopServerUseCase _stopServerUseCase;
   final SelectFolderUseCase _selectFolderUseCase;
+  final PersistSharedFolderUseCase _persistSharedFolderUseCase;
 
   ServerBloc({
     required ServerSessionUseCase serverSessionUseCase,
     required StartServerUseCase startServerUseCase,
     required StopServerUseCase stopServerUseCase,
     required SelectFolderUseCase selectFolderUseCase,
+    required PersistSharedFolderUseCase persistSharedFolderUseCase,
   })  : _serverSessionUseCase = serverSessionUseCase,
         _startServerUseCase = startServerUseCase,
         _stopServerUseCase = stopServerUseCase,
         _selectFolderUseCase = selectFolderUseCase,
+        _persistSharedFolderUseCase = persistSharedFolderUseCase,
         super(const ServerState()) {
     on<_Init>(_init);
     on<_StartServer>(_startServer);
@@ -42,19 +46,50 @@ class ServerBloc extends Bloc<ServerEvent, ServerState> {
     on<_RefreshFiles>(_refreshFiles);
   }
 
-  void _init(_Init event, Emitter<ServerState> emit) {
+  Future<void> _init(_Init event, Emitter<ServerState> emit) async {
     _serverSessionUseCase.connectedDevices.listen(
       (devices) => add(ServerEvent.devicesUpdated(devices)),
     );
     _serverSessionUseCase.activityLog.listen(
       (entry) => add(ServerEvent.logReceived(entry)),
     );
+
+    // Restore the previously selected shared folder, if any.
+    final saved = _persistSharedFolderUseCase.read();
+    if (saved == null) return;
+
+    final missing = !Directory(saved).existsSync();
+    // Apply to the session so the folder is served as soon as the server
+    // starts; surface a missing-folder warning in the UI when it's gone.
+    await _serverSessionUseCase.setSharedFolder(saved);
+    emit(
+      state.copyWith(
+        sharedFolder: saved,
+        sharedFolderMissing: missing,
+      ),
+    );
+    if (!missing) {
+      add(const ServerEvent.refreshFiles());
+    }
   }
 
   Future<void> _startServer(
     _StartServer event,
     Emitter<ServerState> emit,
   ) async {
+    final folder = state.sharedFolder;
+    if (folder == null || !Directory(folder).existsSync()) {
+      emit(
+        state.copyWith(
+          status: ServerStatus.failure,
+          sharedFolderMissing: folder != null,
+          errorMessage: folder == null
+              ? 'Select a folder to share before starting the server'
+              : 'This folder is no longer available, choose a different one',
+        ),
+      );
+      return;
+    }
     emit(state.copyWith(status: ServerStatus.starting));
     final result = await _startServerUseCase(port: state.port);
     result.fold(
@@ -103,12 +138,18 @@ class ServerBloc extends Bloc<ServerEvent, ServerState> {
     await result.fold(
       (path) async {
         final setResult = await _serverSessionUseCase.setSharedFolder(path);
-        setResult.fold(
-          (_) {
-            emit(state.copyWith(sharedFolder: path));
+        await setResult.fold(
+          (_) async {
+            await _persistSharedFolderUseCase.save(path);
+            emit(
+              state.copyWith(
+                sharedFolder: path,
+                sharedFolderMissing: false,
+              ),
+            );
             add(const ServerEvent.refreshFiles());
           },
-          (failure) => emit(
+          (failure) async => emit(
             state.copyWith(
               status: ServerStatus.failure,
               errorMessage: failure.message,

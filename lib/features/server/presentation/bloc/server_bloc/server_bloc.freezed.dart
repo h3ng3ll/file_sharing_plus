@@ -511,7 +511,9 @@ $ActivityLogEntryCopyWith<$Res> get entry {
 /// @nodoc
 mixin _$ServerState {
 
- ServerStatus get status; int get port; String? get ipAddress; String? get sharedFolder; List<FileEntry> get files; List<ConnectedDevice> get devices; List<ActivityLogEntry> get log; String get errorMessage;
+ ServerStatus get status; int get port; String? get ipAddress; String? get sharedFolder;/// True when [sharedFolder] is set but no longer exists on disk (e.g. it
+/// was moved/deleted since it was saved).
+ bool get sharedFolderMissing; List<FileEntry> get files; List<ConnectedDevice> get devices; List<ActivityLogEntry> get log; String get errorMessage;
 /// Create a copy of ServerState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -522,16 +524,16 @@ $ServerStateCopyWith<ServerState> get copyWith => _$ServerStateCopyWithImpl<Serv
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ServerState&&(identical(other.status, status) || other.status == status)&&(identical(other.port, port) || other.port == port)&&(identical(other.ipAddress, ipAddress) || other.ipAddress == ipAddress)&&(identical(other.sharedFolder, sharedFolder) || other.sharedFolder == sharedFolder)&&const DeepCollectionEquality().equals(other.files, files)&&const DeepCollectionEquality().equals(other.devices, devices)&&const DeepCollectionEquality().equals(other.log, log)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ServerState&&(identical(other.status, status) || other.status == status)&&(identical(other.port, port) || other.port == port)&&(identical(other.ipAddress, ipAddress) || other.ipAddress == ipAddress)&&(identical(other.sharedFolder, sharedFolder) || other.sharedFolder == sharedFolder)&&(identical(other.sharedFolderMissing, sharedFolderMissing) || other.sharedFolderMissing == sharedFolderMissing)&&const DeepCollectionEquality().equals(other.files, files)&&const DeepCollectionEquality().equals(other.devices, devices)&&const DeepCollectionEquality().equals(other.log, log)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,port,ipAddress,sharedFolder,const DeepCollectionEquality().hash(files),const DeepCollectionEquality().hash(devices),const DeepCollectionEquality().hash(log),errorMessage);
+int get hashCode => Object.hash(runtimeType,status,port,ipAddress,sharedFolder,sharedFolderMissing,const DeepCollectionEquality().hash(files),const DeepCollectionEquality().hash(devices),const DeepCollectionEquality().hash(log),errorMessage);
 
 @override
 String toString() {
-  return 'ServerState(status: $status, port: $port, ipAddress: $ipAddress, sharedFolder: $sharedFolder, files: $files, devices: $devices, log: $log, errorMessage: $errorMessage)';
+  return 'ServerState(status: $status, port: $port, ipAddress: $ipAddress, sharedFolder: $sharedFolder, sharedFolderMissing: $sharedFolderMissing, files: $files, devices: $devices, log: $log, errorMessage: $errorMessage)';
 }
 
 
@@ -542,7 +544,7 @@ abstract mixin class $ServerStateCopyWith<$Res>  {
   factory $ServerStateCopyWith(ServerState value, $Res Function(ServerState) _then) = _$ServerStateCopyWithImpl;
 @useResult
 $Res call({
- ServerStatus status, int port, String? ipAddress, String? sharedFolder, List<FileEntry> files, List<ConnectedDevice> devices, List<ActivityLogEntry> log, String errorMessage
+ ServerStatus status, int port, String? ipAddress, String? sharedFolder, bool sharedFolderMissing, List<FileEntry> files, List<ConnectedDevice> devices, List<ActivityLogEntry> log, String errorMessage
 });
 
 
@@ -559,13 +561,14 @@ class _$ServerStateCopyWithImpl<$Res>
 
 /// Create a copy of ServerState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? port = null,Object? ipAddress = freezed,Object? sharedFolder = freezed,Object? files = null,Object? devices = null,Object? log = null,Object? errorMessage = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? port = null,Object? ipAddress = freezed,Object? sharedFolder = freezed,Object? sharedFolderMissing = null,Object? files = null,Object? devices = null,Object? log = null,Object? errorMessage = null,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as ServerStatus,port: null == port ? _self.port : port // ignore: cast_nullable_to_non_nullable
 as int,ipAddress: freezed == ipAddress ? _self.ipAddress : ipAddress // ignore: cast_nullable_to_non_nullable
 as String?,sharedFolder: freezed == sharedFolder ? _self.sharedFolder : sharedFolder // ignore: cast_nullable_to_non_nullable
-as String?,files: null == files ? _self.files : files // ignore: cast_nullable_to_non_nullable
+as String?,sharedFolderMissing: null == sharedFolderMissing ? _self.sharedFolderMissing : sharedFolderMissing // ignore: cast_nullable_to_non_nullable
+as bool,files: null == files ? _self.files : files // ignore: cast_nullable_to_non_nullable
 as List<FileEntry>,devices: null == devices ? _self.devices : devices // ignore: cast_nullable_to_non_nullable
 as List<ConnectedDevice>,log: null == log ? _self.log : log // ignore: cast_nullable_to_non_nullable
 as List<ActivityLogEntry>,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
@@ -651,10 +654,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ServerStatus status,  int port,  String? ipAddress,  String? sharedFolder,  List<FileEntry> files,  List<ConnectedDevice> devices,  List<ActivityLogEntry> log,  String errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ServerStatus status,  int port,  String? ipAddress,  String? sharedFolder,  bool sharedFolderMissing,  List<FileEntry> files,  List<ConnectedDevice> devices,  List<ActivityLogEntry> log,  String errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ServerState() when $default != null:
-return $default(_that.status,_that.port,_that.ipAddress,_that.sharedFolder,_that.files,_that.devices,_that.log,_that.errorMessage);case _:
+return $default(_that.status,_that.port,_that.ipAddress,_that.sharedFolder,_that.sharedFolderMissing,_that.files,_that.devices,_that.log,_that.errorMessage);case _:
   return orElse();
 
 }
@@ -672,10 +675,10 @@ return $default(_that.status,_that.port,_that.ipAddress,_that.sharedFolder,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ServerStatus status,  int port,  String? ipAddress,  String? sharedFolder,  List<FileEntry> files,  List<ConnectedDevice> devices,  List<ActivityLogEntry> log,  String errorMessage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ServerStatus status,  int port,  String? ipAddress,  String? sharedFolder,  bool sharedFolderMissing,  List<FileEntry> files,  List<ConnectedDevice> devices,  List<ActivityLogEntry> log,  String errorMessage)  $default,) {final _that = this;
 switch (_that) {
 case _ServerState():
-return $default(_that.status,_that.port,_that.ipAddress,_that.sharedFolder,_that.files,_that.devices,_that.log,_that.errorMessage);}
+return $default(_that.status,_that.port,_that.ipAddress,_that.sharedFolder,_that.sharedFolderMissing,_that.files,_that.devices,_that.log,_that.errorMessage);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -689,10 +692,10 @@ return $default(_that.status,_that.port,_that.ipAddress,_that.sharedFolder,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ServerStatus status,  int port,  String? ipAddress,  String? sharedFolder,  List<FileEntry> files,  List<ConnectedDevice> devices,  List<ActivityLogEntry> log,  String errorMessage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ServerStatus status,  int port,  String? ipAddress,  String? sharedFolder,  bool sharedFolderMissing,  List<FileEntry> files,  List<ConnectedDevice> devices,  List<ActivityLogEntry> log,  String errorMessage)?  $default,) {final _that = this;
 switch (_that) {
 case _ServerState() when $default != null:
-return $default(_that.status,_that.port,_that.ipAddress,_that.sharedFolder,_that.files,_that.devices,_that.log,_that.errorMessage);case _:
+return $default(_that.status,_that.port,_that.ipAddress,_that.sharedFolder,_that.sharedFolderMissing,_that.files,_that.devices,_that.log,_that.errorMessage);case _:
   return null;
 
 }
@@ -704,13 +707,16 @@ return $default(_that.status,_that.port,_that.ipAddress,_that.sharedFolder,_that
 
 
 class _ServerState implements ServerState {
-  const _ServerState({this.status = ServerStatus.stopped, this.port = 8080, this.ipAddress, this.sharedFolder, final  List<FileEntry> files = const <FileEntry>[], final  List<ConnectedDevice> devices = const <ConnectedDevice>[], final  List<ActivityLogEntry> log = const <ActivityLogEntry>[], this.errorMessage = ''}): _files = files,_devices = devices,_log = log;
+  const _ServerState({this.status = ServerStatus.stopped, this.port = 8080, this.ipAddress, this.sharedFolder, this.sharedFolderMissing = false, final  List<FileEntry> files = const <FileEntry>[], final  List<ConnectedDevice> devices = const <ConnectedDevice>[], final  List<ActivityLogEntry> log = const <ActivityLogEntry>[], this.errorMessage = ''}): _files = files,_devices = devices,_log = log;
   
 
 @override@JsonKey() final  ServerStatus status;
 @override@JsonKey() final  int port;
 @override final  String? ipAddress;
 @override final  String? sharedFolder;
+/// True when [sharedFolder] is set but no longer exists on disk (e.g. it
+/// was moved/deleted since it was saved).
+@override@JsonKey() final  bool sharedFolderMissing;
  final  List<FileEntry> _files;
 @override@JsonKey() List<FileEntry> get files {
   if (_files is EqualUnmodifiableListView) return _files;
@@ -744,16 +750,16 @@ _$ServerStateCopyWith<_ServerState> get copyWith => __$ServerStateCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ServerState&&(identical(other.status, status) || other.status == status)&&(identical(other.port, port) || other.port == port)&&(identical(other.ipAddress, ipAddress) || other.ipAddress == ipAddress)&&(identical(other.sharedFolder, sharedFolder) || other.sharedFolder == sharedFolder)&&const DeepCollectionEquality().equals(other._files, _files)&&const DeepCollectionEquality().equals(other._devices, _devices)&&const DeepCollectionEquality().equals(other._log, _log)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ServerState&&(identical(other.status, status) || other.status == status)&&(identical(other.port, port) || other.port == port)&&(identical(other.ipAddress, ipAddress) || other.ipAddress == ipAddress)&&(identical(other.sharedFolder, sharedFolder) || other.sharedFolder == sharedFolder)&&(identical(other.sharedFolderMissing, sharedFolderMissing) || other.sharedFolderMissing == sharedFolderMissing)&&const DeepCollectionEquality().equals(other._files, _files)&&const DeepCollectionEquality().equals(other._devices, _devices)&&const DeepCollectionEquality().equals(other._log, _log)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,port,ipAddress,sharedFolder,const DeepCollectionEquality().hash(_files),const DeepCollectionEquality().hash(_devices),const DeepCollectionEquality().hash(_log),errorMessage);
+int get hashCode => Object.hash(runtimeType,status,port,ipAddress,sharedFolder,sharedFolderMissing,const DeepCollectionEquality().hash(_files),const DeepCollectionEquality().hash(_devices),const DeepCollectionEquality().hash(_log),errorMessage);
 
 @override
 String toString() {
-  return 'ServerState(status: $status, port: $port, ipAddress: $ipAddress, sharedFolder: $sharedFolder, files: $files, devices: $devices, log: $log, errorMessage: $errorMessage)';
+  return 'ServerState(status: $status, port: $port, ipAddress: $ipAddress, sharedFolder: $sharedFolder, sharedFolderMissing: $sharedFolderMissing, files: $files, devices: $devices, log: $log, errorMessage: $errorMessage)';
 }
 
 
@@ -764,7 +770,7 @@ abstract mixin class _$ServerStateCopyWith<$Res> implements $ServerStateCopyWith
   factory _$ServerStateCopyWith(_ServerState value, $Res Function(_ServerState) _then) = __$ServerStateCopyWithImpl;
 @override @useResult
 $Res call({
- ServerStatus status, int port, String? ipAddress, String? sharedFolder, List<FileEntry> files, List<ConnectedDevice> devices, List<ActivityLogEntry> log, String errorMessage
+ ServerStatus status, int port, String? ipAddress, String? sharedFolder, bool sharedFolderMissing, List<FileEntry> files, List<ConnectedDevice> devices, List<ActivityLogEntry> log, String errorMessage
 });
 
 
@@ -781,13 +787,14 @@ class __$ServerStateCopyWithImpl<$Res>
 
 /// Create a copy of ServerState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? port = null,Object? ipAddress = freezed,Object? sharedFolder = freezed,Object? files = null,Object? devices = null,Object? log = null,Object? errorMessage = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? port = null,Object? ipAddress = freezed,Object? sharedFolder = freezed,Object? sharedFolderMissing = null,Object? files = null,Object? devices = null,Object? log = null,Object? errorMessage = null,}) {
   return _then(_ServerState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as ServerStatus,port: null == port ? _self.port : port // ignore: cast_nullable_to_non_nullable
 as int,ipAddress: freezed == ipAddress ? _self.ipAddress : ipAddress // ignore: cast_nullable_to_non_nullable
 as String?,sharedFolder: freezed == sharedFolder ? _self.sharedFolder : sharedFolder // ignore: cast_nullable_to_non_nullable
-as String?,files: null == files ? _self._files : files // ignore: cast_nullable_to_non_nullable
+as String?,sharedFolderMissing: null == sharedFolderMissing ? _self.sharedFolderMissing : sharedFolderMissing // ignore: cast_nullable_to_non_nullable
+as bool,files: null == files ? _self._files : files // ignore: cast_nullable_to_non_nullable
 as List<FileEntry>,devices: null == devices ? _self._devices : devices // ignore: cast_nullable_to_non_nullable
 as List<ConnectedDevice>,log: null == log ? _self._log : log // ignore: cast_nullable_to_non_nullable
 as List<ActivityLogEntry>,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable

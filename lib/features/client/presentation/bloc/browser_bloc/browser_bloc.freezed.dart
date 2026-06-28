@@ -682,7 +682,7 @@ mixin _$BrowserState {
 
  BrowserStatus get status; DiscoveredServer? get server; String get path; List<FileEntry> get files; TransferProgress? get progress;/// The most recently finished transfer (drives the per-transfer toast and
 /// the optional Save-to-Files prompt). History itself lives in HistoryBloc.
- TransferRecord? get lastTransfer;/// One-shot informational message (e.g. "Deleted <file>") for the page to
+ TransferRecord? get lastTransfer;/// One-shot informational message (e.g. "Deleted my-file") for the page to
 /// surface as a success toast.
  String? get infoMessage; String get errorMessage;
 /// Create a copy of BrowserState
@@ -918,7 +918,7 @@ class _BrowserState implements BrowserState {
 /// The most recently finished transfer (drives the per-transfer toast and
 /// the optional Save-to-Files prompt). History itself lives in HistoryBloc.
 @override final  TransferRecord? lastTransfer;
-/// One-shot informational message (e.g. "Deleted <file>") for the page to
+/// One-shot informational message (e.g. "Deleted my-file") for the page to
 /// surface as a success toast.
 @override final  String? infoMessage;
 @override@JsonKey() final  String errorMessage;
