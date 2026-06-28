@@ -101,6 +101,7 @@ class HttpClientRepository implements IClientRepository {
             direction: TransferDirection.download,
             transferred: received,
             total: total <= 0 ? received : total,
+            savedPath: dest.path,
           ),
         );
         await controller.close();

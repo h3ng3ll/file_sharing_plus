@@ -136,6 +136,7 @@ class BrowserBloc extends Bloc<BrowserEvent, BrowserState> {
         fileName: event.fileName,
         direction: TransferDirection.download,
         success: state.errorMessage.isEmpty,
+        savedPath: state.progress?.savedPath,
       ),
     );
   }
@@ -178,6 +179,7 @@ class BrowserBloc extends Bloc<BrowserEvent, BrowserState> {
       direction: event.direction,
       success: event.success,
       timestamp: DateTime.now(),
+      savedPath: event.savedPath,
     );
     emit(
       state.copyWith(

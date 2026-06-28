@@ -15,6 +15,9 @@ sealed class TransferProgress with _$TransferProgress {
     required TransferDirection direction,
     required int transferred,
     required int total,
+
+    /// Local path the file was saved to (set on the final download progress).
+    String? savedPath,
   }) = _TransferProgress;
 
   /// Completion ratio in the range `0.0`–`1.0`, or `null` when the total size

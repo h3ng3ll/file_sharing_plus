@@ -137,7 +137,7 @@ return transferFinished(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( DiscoveredServer server)?  init,TResult Function()?  loadFiles,TResult Function()?  startWatching,TResult Function( String name)?  openFolder,TResult Function()?  goUp,TResult Function( String fileName)?  download,TResult Function()?  pickAndUpload,TResult Function( String fileName,  TransferDirection direction,  bool success)?  transferFinished,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( DiscoveredServer server)?  init,TResult Function()?  loadFiles,TResult Function()?  startWatching,TResult Function( String name)?  openFolder,TResult Function()?  goUp,TResult Function( String fileName)?  download,TResult Function()?  pickAndUpload,TResult Function( String fileName,  TransferDirection direction,  bool success,  String? savedPath)?  transferFinished,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Init() when init != null:
 return init(_that.server);case _LoadFiles() when loadFiles != null:
@@ -147,7 +147,7 @@ return openFolder(_that.name);case _GoUp() when goUp != null:
 return goUp();case _Download() when download != null:
 return download(_that.fileName);case _PickAndUpload() when pickAndUpload != null:
 return pickAndUpload();case _TransferFinished() when transferFinished != null:
-return transferFinished(_that.fileName,_that.direction,_that.success);case _:
+return transferFinished(_that.fileName,_that.direction,_that.success,_that.savedPath);case _:
   return orElse();
 
 }
@@ -165,7 +165,7 @@ return transferFinished(_that.fileName,_that.direction,_that.success);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( DiscoveredServer server)  init,required TResult Function()  loadFiles,required TResult Function()  startWatching,required TResult Function( String name)  openFolder,required TResult Function()  goUp,required TResult Function( String fileName)  download,required TResult Function()  pickAndUpload,required TResult Function( String fileName,  TransferDirection direction,  bool success)  transferFinished,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( DiscoveredServer server)  init,required TResult Function()  loadFiles,required TResult Function()  startWatching,required TResult Function( String name)  openFolder,required TResult Function()  goUp,required TResult Function( String fileName)  download,required TResult Function()  pickAndUpload,required TResult Function( String fileName,  TransferDirection direction,  bool success,  String? savedPath)  transferFinished,}) {final _that = this;
 switch (_that) {
 case _Init():
 return init(_that.server);case _LoadFiles():
@@ -175,7 +175,7 @@ return openFolder(_that.name);case _GoUp():
 return goUp();case _Download():
 return download(_that.fileName);case _PickAndUpload():
 return pickAndUpload();case _TransferFinished():
-return transferFinished(_that.fileName,_that.direction,_that.success);}
+return transferFinished(_that.fileName,_that.direction,_that.success,_that.savedPath);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -189,7 +189,7 @@ return transferFinished(_that.fileName,_that.direction,_that.success);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( DiscoveredServer server)?  init,TResult? Function()?  loadFiles,TResult? Function()?  startWatching,TResult? Function( String name)?  openFolder,TResult? Function()?  goUp,TResult? Function( String fileName)?  download,TResult? Function()?  pickAndUpload,TResult? Function( String fileName,  TransferDirection direction,  bool success)?  transferFinished,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( DiscoveredServer server)?  init,TResult? Function()?  loadFiles,TResult? Function()?  startWatching,TResult? Function( String name)?  openFolder,TResult? Function()?  goUp,TResult? Function( String fileName)?  download,TResult? Function()?  pickAndUpload,TResult? Function( String fileName,  TransferDirection direction,  bool success,  String? savedPath)?  transferFinished,}) {final _that = this;
 switch (_that) {
 case _Init() when init != null:
 return init(_that.server);case _LoadFiles() when loadFiles != null:
@@ -199,7 +199,7 @@ return openFolder(_that.name);case _GoUp() when goUp != null:
 return goUp();case _Download() when download != null:
 return download(_that.fileName);case _PickAndUpload() when pickAndUpload != null:
 return pickAndUpload();case _TransferFinished() when transferFinished != null:
-return transferFinished(_that.fileName,_that.direction,_that.success);case _:
+return transferFinished(_that.fileName,_that.direction,_that.success,_that.savedPath);case _:
   return null;
 
 }
@@ -537,12 +537,13 @@ String toString() {
 
 
 class _TransferFinished implements BrowserEvent {
-  const _TransferFinished({required this.fileName, required this.direction, required this.success});
+  const _TransferFinished({required this.fileName, required this.direction, required this.success, this.savedPath});
   
 
  final  String fileName;
  final  TransferDirection direction;
  final  bool success;
+ final  String? savedPath;
 
 /// Create a copy of BrowserEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -554,16 +555,16 @@ _$TransferFinishedCopyWith<_TransferFinished> get copyWith => __$TransferFinishe
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TransferFinished&&(identical(other.fileName, fileName) || other.fileName == fileName)&&(identical(other.direction, direction) || other.direction == direction)&&(identical(other.success, success) || other.success == success));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TransferFinished&&(identical(other.fileName, fileName) || other.fileName == fileName)&&(identical(other.direction, direction) || other.direction == direction)&&(identical(other.success, success) || other.success == success)&&(identical(other.savedPath, savedPath) || other.savedPath == savedPath));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,fileName,direction,success);
+int get hashCode => Object.hash(runtimeType,fileName,direction,success,savedPath);
 
 @override
 String toString() {
-  return 'BrowserEvent.transferFinished(fileName: $fileName, direction: $direction, success: $success)';
+  return 'BrowserEvent.transferFinished(fileName: $fileName, direction: $direction, success: $success, savedPath: $savedPath)';
 }
 
 
@@ -574,7 +575,7 @@ abstract mixin class _$TransferFinishedCopyWith<$Res> implements $BrowserEventCo
   factory _$TransferFinishedCopyWith(_TransferFinished value, $Res Function(_TransferFinished) _then) = __$TransferFinishedCopyWithImpl;
 @useResult
 $Res call({
- String fileName, TransferDirection direction, bool success
+ String fileName, TransferDirection direction, bool success, String? savedPath
 });
 
 
@@ -591,12 +592,13 @@ class __$TransferFinishedCopyWithImpl<$Res>
 
 /// Create a copy of BrowserEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? fileName = null,Object? direction = null,Object? success = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? fileName = null,Object? direction = null,Object? success = null,Object? savedPath = freezed,}) {
   return _then(_TransferFinished(
 fileName: null == fileName ? _self.fileName : fileName // ignore: cast_nullable_to_non_nullable
 as String,direction: null == direction ? _self.direction : direction // ignore: cast_nullable_to_non_nullable
 as TransferDirection,success: null == success ? _self.success : success // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,savedPath: freezed == savedPath ? _self.savedPath : savedPath // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

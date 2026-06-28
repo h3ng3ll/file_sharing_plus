@@ -19,5 +19,6 @@ sealed class BrowserEvent with _$BrowserEvent {
     required String fileName,
     required TransferDirection direction,
     required bool success,
+    String? savedPath,
   }) = _TransferFinished;
 }

@@ -42,6 +42,9 @@ dependencies:
   path_provider: ^2.1.5
   path: ^1.9.0
 
+  # Native share / "Save to Files" sheet
+  share_plus: ^10.1.4
+
   # Spacing helper
   gap: ^3.0.1
 

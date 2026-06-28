@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/di/injection.dart';
 import '../../../../../core/services/discovery_service.dart';
+import '../../../../../core/services/file_share_service.dart';
 import '../../../../../core/services/ui_message_service.dart';
 import '../../../../../core/widgets/custom_app_bar.dart';
 import '../../../domain/models/transfer_progress.dart';
@@ -40,12 +41,26 @@ class _FileBrowserPageState extends State<FileBrowserPage> {
   }
 
   void _notifyTransfer(TransferRecord record) {
-    final verb =
-        record.direction == TransferDirection.download ? 'Download' : 'Upload';
-    if (record.success) {
-      UiMessageService.showSuccess('$verb complete: ${record.fileName}');
-    } else {
+    final isDownload = record.direction == TransferDirection.download;
+    final verb = isDownload ? 'Download' : 'Upload';
+
+    if (!record.success) {
       UiMessageService.showError('$verb failed: ${record.fileName}');
+      return;
+    }
+
+    if (isDownload && record.savedPath != null) {
+      // Offer "Save to Files" so the user can place the file where they can
+      // find it; the app's own storage is not browsable in the Files app.
+      UiMessageService.showSuccess(
+        'Downloaded ${record.fileName} — choose where to save',
+      );
+      FileShareService.saveFile(
+        record.savedPath!,
+        subject: record.fileName,
+      );
+    } else {
+      UiMessageService.showSuccess('$verb complete: ${record.fileName}');
     }
   }
 

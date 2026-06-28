@@ -86,6 +86,10 @@ void main() {
           .toList();
       expect(updates, isNotEmpty);
       expect(updates.last.isComplete, isTrue);
+      // The final progress carries the on-disk path so the UI can offer
+      // "Save to Files".
+      expect(updates.last.savedPath, isNotNull);
+      expect(File(updates.last.savedPath!).existsSync(), isTrue);
     });
   });
 

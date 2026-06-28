@@ -14,7 +14,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$TransferRecord {
 
- String get fileName; TransferDirection get direction; bool get success; DateTime get timestamp;
+ String get fileName; TransferDirection get direction; bool get success; DateTime get timestamp;/// Local path of a downloaded file (used to offer "Save to Files").
+ String? get savedPath;
 /// Create a copy of TransferRecord
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +26,16 @@ $TransferRecordCopyWith<TransferRecord> get copyWith => _$TransferRecordCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TransferRecord&&(identical(other.fileName, fileName) || other.fileName == fileName)&&(identical(other.direction, direction) || other.direction == direction)&&(identical(other.success, success) || other.success == success)&&(identical(other.timestamp, timestamp) || other.timestamp == timestamp));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TransferRecord&&(identical(other.fileName, fileName) || other.fileName == fileName)&&(identical(other.direction, direction) || other.direction == direction)&&(identical(other.success, success) || other.success == success)&&(identical(other.timestamp, timestamp) || other.timestamp == timestamp)&&(identical(other.savedPath, savedPath) || other.savedPath == savedPath));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,fileName,direction,success,timestamp);
+int get hashCode => Object.hash(runtimeType,fileName,direction,success,timestamp,savedPath);
 
 @override
 String toString() {
-  return 'TransferRecord(fileName: $fileName, direction: $direction, success: $success, timestamp: $timestamp)';
+  return 'TransferRecord(fileName: $fileName, direction: $direction, success: $success, timestamp: $timestamp, savedPath: $savedPath)';
 }
 
 
@@ -45,7 +46,7 @@ abstract mixin class $TransferRecordCopyWith<$Res>  {
   factory $TransferRecordCopyWith(TransferRecord value, $Res Function(TransferRecord) _then) = _$TransferRecordCopyWithImpl;
 @useResult
 $Res call({
- String fileName, TransferDirection direction, bool success, DateTime timestamp
+ String fileName, TransferDirection direction, bool success, DateTime timestamp, String? savedPath
 });
 
 
@@ -62,13 +63,14 @@ class _$TransferRecordCopyWithImpl<$Res>
 
 /// Create a copy of TransferRecord
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? fileName = null,Object? direction = null,Object? success = null,Object? timestamp = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? fileName = null,Object? direction = null,Object? success = null,Object? timestamp = null,Object? savedPath = freezed,}) {
   return _then(_self.copyWith(
 fileName: null == fileName ? _self.fileName : fileName // ignore: cast_nullable_to_non_nullable
 as String,direction: null == direction ? _self.direction : direction // ignore: cast_nullable_to_non_nullable
 as TransferDirection,success: null == success ? _self.success : success // ignore: cast_nullable_to_non_nullable
 as bool,timestamp: null == timestamp ? _self.timestamp : timestamp // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as DateTime,savedPath: freezed == savedPath ? _self.savedPath : savedPath // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -150,10 +152,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String fileName,  TransferDirection direction,  bool success,  DateTime timestamp)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String fileName,  TransferDirection direction,  bool success,  DateTime timestamp,  String? savedPath)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TransferRecord() when $default != null:
-return $default(_that.fileName,_that.direction,_that.success,_that.timestamp);case _:
+return $default(_that.fileName,_that.direction,_that.success,_that.timestamp,_that.savedPath);case _:
   return orElse();
 
 }
@@ -171,10 +173,10 @@ return $default(_that.fileName,_that.direction,_that.success,_that.timestamp);ca
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String fileName,  TransferDirection direction,  bool success,  DateTime timestamp)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String fileName,  TransferDirection direction,  bool success,  DateTime timestamp,  String? savedPath)  $default,) {final _that = this;
 switch (_that) {
 case _TransferRecord():
-return $default(_that.fileName,_that.direction,_that.success,_that.timestamp);}
+return $default(_that.fileName,_that.direction,_that.success,_that.timestamp,_that.savedPath);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -188,10 +190,10 @@ return $default(_that.fileName,_that.direction,_that.success,_that.timestamp);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String fileName,  TransferDirection direction,  bool success,  DateTime timestamp)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String fileName,  TransferDirection direction,  bool success,  DateTime timestamp,  String? savedPath)?  $default,) {final _that = this;
 switch (_that) {
 case _TransferRecord() when $default != null:
-return $default(_that.fileName,_that.direction,_that.success,_that.timestamp);case _:
+return $default(_that.fileName,_that.direction,_that.success,_that.timestamp,_that.savedPath);case _:
   return null;
 
 }
@@ -203,13 +205,15 @@ return $default(_that.fileName,_that.direction,_that.success,_that.timestamp);ca
 
 
 class _TransferRecord implements TransferRecord {
-  const _TransferRecord({required this.fileName, required this.direction, required this.success, required this.timestamp});
+  const _TransferRecord({required this.fileName, required this.direction, required this.success, required this.timestamp, this.savedPath});
   
 
 @override final  String fileName;
 @override final  TransferDirection direction;
 @override final  bool success;
 @override final  DateTime timestamp;
+/// Local path of a downloaded file (used to offer "Save to Files").
+@override final  String? savedPath;
 
 /// Create a copy of TransferRecord
 /// with the given fields replaced by the non-null parameter values.
@@ -221,16 +225,16 @@ _$TransferRecordCopyWith<_TransferRecord> get copyWith => __$TransferRecordCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TransferRecord&&(identical(other.fileName, fileName) || other.fileName == fileName)&&(identical(other.direction, direction) || other.direction == direction)&&(identical(other.success, success) || other.success == success)&&(identical(other.timestamp, timestamp) || other.timestamp == timestamp));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TransferRecord&&(identical(other.fileName, fileName) || other.fileName == fileName)&&(identical(other.direction, direction) || other.direction == direction)&&(identical(other.success, success) || other.success == success)&&(identical(other.timestamp, timestamp) || other.timestamp == timestamp)&&(identical(other.savedPath, savedPath) || other.savedPath == savedPath));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,fileName,direction,success,timestamp);
+int get hashCode => Object.hash(runtimeType,fileName,direction,success,timestamp,savedPath);
 
 @override
 String toString() {
-  return 'TransferRecord(fileName: $fileName, direction: $direction, success: $success, timestamp: $timestamp)';
+  return 'TransferRecord(fileName: $fileName, direction: $direction, success: $success, timestamp: $timestamp, savedPath: $savedPath)';
 }
 
 
@@ -241,7 +245,7 @@ abstract mixin class _$TransferRecordCopyWith<$Res> implements $TransferRecordCo
   factory _$TransferRecordCopyWith(_TransferRecord value, $Res Function(_TransferRecord) _then) = __$TransferRecordCopyWithImpl;
 @override @useResult
 $Res call({
- String fileName, TransferDirection direction, bool success, DateTime timestamp
+ String fileName, TransferDirection direction, bool success, DateTime timestamp, String? savedPath
 });
 
 
@@ -258,13 +262,14 @@ class __$TransferRecordCopyWithImpl<$Res>
 
 /// Create a copy of TransferRecord
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? fileName = null,Object? direction = null,Object? success = null,Object? timestamp = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? fileName = null,Object? direction = null,Object? success = null,Object? timestamp = null,Object? savedPath = freezed,}) {
   return _then(_TransferRecord(
 fileName: null == fileName ? _self.fileName : fileName // ignore: cast_nullable_to_non_nullable
 as String,direction: null == direction ? _self.direction : direction // ignore: cast_nullable_to_non_nullable
 as TransferDirection,success: null == success ? _self.success : success // ignore: cast_nullable_to_non_nullable
 as bool,timestamp: null == timestamp ? _self.timestamp : timestamp // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as DateTime,savedPath: freezed == savedPath ? _self.savedPath : savedPath // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

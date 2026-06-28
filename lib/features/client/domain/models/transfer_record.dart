@@ -12,5 +12,8 @@ sealed class TransferRecord with _$TransferRecord {
     required TransferDirection direction,
     required bool success,
     required DateTime timestamp,
+
+    /// Local path of a downloaded file (used to offer "Save to Files").
+    String? savedPath,
   }) = _TransferRecord;
 }

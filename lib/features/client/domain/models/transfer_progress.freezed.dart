@@ -14,7 +14,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$TransferProgress {
 
- String get fileName; TransferDirection get direction; int get transferred; int get total;
+ String get fileName; TransferDirection get direction; int get transferred; int get total;/// Local path the file was saved to (set on the final download progress).
+ String? get savedPath;
 /// Create a copy of TransferProgress
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +26,16 @@ $TransferProgressCopyWith<TransferProgress> get copyWith => _$TransferProgressCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TransferProgress&&(identical(other.fileName, fileName) || other.fileName == fileName)&&(identical(other.direction, direction) || other.direction == direction)&&(identical(other.transferred, transferred) || other.transferred == transferred)&&(identical(other.total, total) || other.total == total));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TransferProgress&&(identical(other.fileName, fileName) || other.fileName == fileName)&&(identical(other.direction, direction) || other.direction == direction)&&(identical(other.transferred, transferred) || other.transferred == transferred)&&(identical(other.total, total) || other.total == total)&&(identical(other.savedPath, savedPath) || other.savedPath == savedPath));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,fileName,direction,transferred,total);
+int get hashCode => Object.hash(runtimeType,fileName,direction,transferred,total,savedPath);
 
 @override
 String toString() {
-  return 'TransferProgress(fileName: $fileName, direction: $direction, transferred: $transferred, total: $total)';
+  return 'TransferProgress(fileName: $fileName, direction: $direction, transferred: $transferred, total: $total, savedPath: $savedPath)';
 }
 
 
@@ -45,7 +46,7 @@ abstract mixin class $TransferProgressCopyWith<$Res>  {
   factory $TransferProgressCopyWith(TransferProgress value, $Res Function(TransferProgress) _then) = _$TransferProgressCopyWithImpl;
 @useResult
 $Res call({
- String fileName, TransferDirection direction, int transferred, int total
+ String fileName, TransferDirection direction, int transferred, int total, String? savedPath
 });
 
 
@@ -62,13 +63,14 @@ class _$TransferProgressCopyWithImpl<$Res>
 
 /// Create a copy of TransferProgress
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? fileName = null,Object? direction = null,Object? transferred = null,Object? total = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? fileName = null,Object? direction = null,Object? transferred = null,Object? total = null,Object? savedPath = freezed,}) {
   return _then(_self.copyWith(
 fileName: null == fileName ? _self.fileName : fileName // ignore: cast_nullable_to_non_nullable
 as String,direction: null == direction ? _self.direction : direction // ignore: cast_nullable_to_non_nullable
 as TransferDirection,transferred: null == transferred ? _self.transferred : transferred // ignore: cast_nullable_to_non_nullable
 as int,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
-as int,
+as int,savedPath: freezed == savedPath ? _self.savedPath : savedPath // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -150,10 +152,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String fileName,  TransferDirection direction,  int transferred,  int total)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String fileName,  TransferDirection direction,  int transferred,  int total,  String? savedPath)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TransferProgress() when $default != null:
-return $default(_that.fileName,_that.direction,_that.transferred,_that.total);case _:
+return $default(_that.fileName,_that.direction,_that.transferred,_that.total,_that.savedPath);case _:
   return orElse();
 
 }
@@ -171,10 +173,10 @@ return $default(_that.fileName,_that.direction,_that.transferred,_that.total);ca
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String fileName,  TransferDirection direction,  int transferred,  int total)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String fileName,  TransferDirection direction,  int transferred,  int total,  String? savedPath)  $default,) {final _that = this;
 switch (_that) {
 case _TransferProgress():
-return $default(_that.fileName,_that.direction,_that.transferred,_that.total);}
+return $default(_that.fileName,_that.direction,_that.transferred,_that.total,_that.savedPath);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -188,10 +190,10 @@ return $default(_that.fileName,_that.direction,_that.transferred,_that.total);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String fileName,  TransferDirection direction,  int transferred,  int total)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String fileName,  TransferDirection direction,  int transferred,  int total,  String? savedPath)?  $default,) {final _that = this;
 switch (_that) {
 case _TransferProgress() when $default != null:
-return $default(_that.fileName,_that.direction,_that.transferred,_that.total);case _:
+return $default(_that.fileName,_that.direction,_that.transferred,_that.total,_that.savedPath);case _:
   return null;
 
 }
@@ -203,13 +205,15 @@ return $default(_that.fileName,_that.direction,_that.transferred,_that.total);ca
 
 
 class _TransferProgress extends TransferProgress {
-  const _TransferProgress({required this.fileName, required this.direction, required this.transferred, required this.total}): super._();
+  const _TransferProgress({required this.fileName, required this.direction, required this.transferred, required this.total, this.savedPath}): super._();
   
 
 @override final  String fileName;
 @override final  TransferDirection direction;
 @override final  int transferred;
 @override final  int total;
+/// Local path the file was saved to (set on the final download progress).
+@override final  String? savedPath;
 
 /// Create a copy of TransferProgress
 /// with the given fields replaced by the non-null parameter values.
@@ -221,16 +225,16 @@ _$TransferProgressCopyWith<_TransferProgress> get copyWith => __$TransferProgres
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TransferProgress&&(identical(other.fileName, fileName) || other.fileName == fileName)&&(identical(other.direction, direction) || other.direction == direction)&&(identical(other.transferred, transferred) || other.transferred == transferred)&&(identical(other.total, total) || other.total == total));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TransferProgress&&(identical(other.fileName, fileName) || other.fileName == fileName)&&(identical(other.direction, direction) || other.direction == direction)&&(identical(other.transferred, transferred) || other.transferred == transferred)&&(identical(other.total, total) || other.total == total)&&(identical(other.savedPath, savedPath) || other.savedPath == savedPath));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,fileName,direction,transferred,total);
+int get hashCode => Object.hash(runtimeType,fileName,direction,transferred,total,savedPath);
 
 @override
 String toString() {
-  return 'TransferProgress(fileName: $fileName, direction: $direction, transferred: $transferred, total: $total)';
+  return 'TransferProgress(fileName: $fileName, direction: $direction, transferred: $transferred, total: $total, savedPath: $savedPath)';
 }
 
 
@@ -241,7 +245,7 @@ abstract mixin class _$TransferProgressCopyWith<$Res> implements $TransferProgre
   factory _$TransferProgressCopyWith(_TransferProgress value, $Res Function(_TransferProgress) _then) = __$TransferProgressCopyWithImpl;
 @override @useResult
 $Res call({
- String fileName, TransferDirection direction, int transferred, int total
+ String fileName, TransferDirection direction, int transferred, int total, String? savedPath
 });
 
 
@@ -258,13 +262,14 @@ class __$TransferProgressCopyWithImpl<$Res>
 
 /// Create a copy of TransferProgress
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? fileName = null,Object? direction = null,Object? transferred = null,Object? total = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? fileName = null,Object? direction = null,Object? transferred = null,Object? total = null,Object? savedPath = freezed,}) {
   return _then(_TransferProgress(
 fileName: null == fileName ? _self.fileName : fileName // ignore: cast_nullable_to_non_nullable
 as String,direction: null == direction ? _self.direction : direction // ignore: cast_nullable_to_non_nullable
 as TransferDirection,transferred: null == transferred ? _self.transferred : transferred // ignore: cast_nullable_to_non_nullable
 as int,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
-as int,
+as int,savedPath: freezed == savedPath ? _self.savedPath : savedPath // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
