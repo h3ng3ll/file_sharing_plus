@@ -1,0 +1,105 @@
+import 'dart:io';
+
+import 'package:file_sharing/core/services/discovery_service.dart';
+import 'package:file_sharing/features/client/data/repositories/http_client_repository.dart';
+import 'package:file_sharing/features/server/data/repositories/http_server_repository.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as p;
+
+/// [HttpOverrides] that produces real [HttpClient]s.
+///
+/// `flutter_test` installs an override that makes every request return 400 so
+/// unit tests never hit the network. This integration test deliberately uses a
+/// real loopback socket, so it restores the default behaviour via `super`.
+class _RealHttpOverrides extends HttpOverrides {}
+
+/// Runs [body] with a real [HttpClient] available.
+T _withRealHttp<T>(T Function() body) =>
+    HttpOverrides.runWithHttpOverrides(body, _RealHttpOverrides());
+
+/// End-to-end test of the HTTP transfer layer: the real server repository and
+/// the real client repository talk over a loopback socket. Verifies list,
+/// streamed download and streamed multipart upload.
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  late Directory sharedDir;
+  late Directory downloadsDir;
+  late HttpServerRepository server;
+  late HttpClientRepository client;
+  late DiscoveredServer device;
+
+  setUp(() async {
+    sharedDir = await Directory.systemTemp.createTemp('fs_shared');
+    downloadsDir = await Directory.systemTemp.createTemp('fs_downloads');
+
+    // Stub path_provider so downloads land in a temp directory.
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/path_provider'),
+      (call) async => downloadsDir.path,
+    );
+    File(p.join(sharedDir.path, 'hello.txt'))
+        .writeAsStringSync('hello world');
+
+    server = HttpServerRepository()..setSharedFolder(sharedDir.path);
+    final port = await server.start(port: 0);
+    // Build the client inside a real-HTTP zone so Dio's IOHttpClientAdapter
+    // gets a real HttpClient instead of the flutter_test mock.
+    client = _withRealHttp(HttpClientRepository.new);
+    device = DiscoveredServer(
+      name: 'test',
+      host: InternetAddress.loopbackIPv4.address,
+      port: port,
+    );
+  });
+
+  tearDown(() async {
+    await server.stop();
+    sharedDir.deleteSync(recursive: true);
+    downloadsDir.deleteSync(recursive: true);
+  });
+
+  test('ping reports the server is reachable', () {
+    return _withRealHttp(() async {
+      expect(
+        await client.ping(host: device.host, port: device.port),
+        isTrue,
+      );
+    });
+  });
+
+  test('listFiles returns the shared file', () {
+    return _withRealHttp(() async {
+      final files = await client.listFiles(server: device);
+      expect(files.map((f) => f.name), contains('hello.txt'));
+    });
+  });
+
+  test('download streams the file with progress', () {
+    return _withRealHttp(() async {
+      final updates = await client
+          .downloadFile(server: device, fileName: 'hello.txt')
+          .toList();
+      expect(updates, isNotEmpty);
+      expect(updates.last.isComplete, isTrue);
+    });
+  });
+
+  test('upload streams a multipart file to the shared folder', () {
+    return _withRealHttp(() async {
+      final src = File(p.join(sharedDir.path, 'to_upload.bin'));
+      src.writeAsBytesSync(List<int>.generate(50000, (i) => i % 256));
+
+      final updates = await client
+          .uploadFile(server: device, filePath: src.path)
+          .toList();
+      expect(updates.last.transferred, updates.last.total);
+
+      final uploaded = File(p.join(sharedDir.path, 'to_upload.bin'));
+      expect(uploaded.existsSync(), isTrue);
+      expect(uploaded.lengthSync(), 50000);
+    });
+  });
+}
