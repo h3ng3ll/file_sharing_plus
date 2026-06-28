@@ -93,6 +93,50 @@ void main() {
     });
   });
 
+  test('deleteFile removes a file from the shared folder', () {
+    return _withRealHttp(() async {
+      expect(File(p.join(sharedDir.path, 'hello.txt')).existsSync(), isTrue);
+
+      await client.deleteFile(server: device, fileName: 'hello.txt');
+
+      expect(File(p.join(sharedDir.path, 'hello.txt')).existsSync(), isFalse);
+      final files = await client.listFiles(server: device);
+      expect(files.map((f) => f.name), isNot(contains('hello.txt')));
+    });
+  });
+
+  test('download and delete handle non-ASCII filenames', () {
+    return _withRealHttp(() async {
+      const name = 'Опор.json';
+      File(p.join(sharedDir.path, name)).writeAsStringSync('{}');
+
+      // Download round-trips the Cyrillic name correctly.
+      final updates =
+          await client.downloadFile(server: device, fileName: name).toList();
+      expect(updates.last.isComplete, isTrue);
+      expect(File(updates.last.savedPath!).existsSync(), isTrue);
+
+      // Delete removes exactly that file.
+      await client.deleteFile(server: device, fileName: name);
+      expect(File(p.join(sharedDir.path, name)).existsSync(), isFalse);
+      final files = await client.listFiles(server: device);
+      expect(files.map((f) => f.name), isNot(contains(name)));
+    });
+  });
+
+  test('deleteFile rejects deleting a directory', () {
+    return _withRealHttp(() async {
+      Directory(p.join(sharedDir.path, 'sub')).createSync();
+
+      await expectLater(
+        client.deleteFile(server: device, fileName: 'sub'),
+        throwsA(anything),
+      );
+      // Directory must still exist after a rejected delete.
+      expect(Directory(p.join(sharedDir.path, 'sub')).existsSync(), isTrue);
+    });
+  });
+
   test('upload streams a multipart file to the shared folder', () {
     return _withRealHttp(() async {
       final src = File(p.join(sharedDir.path, 'to_upload.bin'));

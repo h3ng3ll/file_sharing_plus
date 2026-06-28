@@ -6,6 +6,7 @@ import '../../../../../core/models/file_entry/file_entry.dart';
 import '../../../../../core/services/discovery_service.dart';
 import '../../../domain/models/transfer_progress.dart';
 import '../../../domain/models/transfer_record.dart';
+import '../../../domain/use_cases/delete_file_use_case.dart';
 import '../../../domain/use_cases/download_file_use_case.dart';
 import '../../../domain/use_cases/list_files_use_case.dart';
 import '../../../domain/use_cases/record_transfer_use_case.dart';
@@ -23,6 +24,7 @@ class BrowserBloc extends Bloc<BrowserEvent, BrowserState> {
   final UploadFileUseCase _uploadFileUseCase;
   final WatchFilesUseCase _watchFilesUseCase;
   final RecordTransferUseCase _recordTransferUseCase;
+  final DeleteFileUseCase _deleteFileUseCase;
 
   BrowserBloc({
     required ListFilesUseCase listFilesUseCase,
@@ -30,17 +32,20 @@ class BrowserBloc extends Bloc<BrowserEvent, BrowserState> {
     required UploadFileUseCase uploadFileUseCase,
     required WatchFilesUseCase watchFilesUseCase,
     required RecordTransferUseCase recordTransferUseCase,
+    required DeleteFileUseCase deleteFileUseCase,
   })  : _listFilesUseCase = listFilesUseCase,
         _downloadFileUseCase = downloadFileUseCase,
         _uploadFileUseCase = uploadFileUseCase,
         _watchFilesUseCase = watchFilesUseCase,
         _recordTransferUseCase = recordTransferUseCase,
+        _deleteFileUseCase = deleteFileUseCase,
         super(const BrowserState()) {
     on<_Init>(_init);
     on<_OpenFolder>(_openFolder);
     on<_GoUp>(_goUp);
     on<_LoadFiles>(_loadFiles);
     on<_Download>(_download);
+    on<_DeleteFile>(_delete);
     on<_PickAndUpload>(_pickAndUpload);
     on<_TransferFinished>(_transferFinished);
     on<_StartWatching>(_startWatching);
@@ -141,6 +146,27 @@ class BrowserBloc extends Bloc<BrowserEvent, BrowserState> {
         direction: TransferDirection.download,
         success: state.errorMessage.isEmpty,
         savedPath: state.progress?.savedPath,
+      ),
+    );
+  }
+
+  Future<void> _delete(_DeleteFile event, Emitter<BrowserState> emit) async {
+    final server = state.server;
+    if (server == null) return;
+    final result = await _deleteFileUseCase(
+      server: server,
+      fileName: event.fileName,
+      path: state.path,
+    );
+    result.fold(
+      // The list refreshes via the server's WebSocket push; just surface a
+      // one-shot success message for the page to toast.
+      (_) => emit(state.copyWith(infoMessage: 'Deleted ${event.fileName}')),
+      (failure) => emit(
+        state.copyWith(
+          status: BrowserStatus.failure,
+          errorMessage: failure.message,
+        ),
       ),
     );
   }

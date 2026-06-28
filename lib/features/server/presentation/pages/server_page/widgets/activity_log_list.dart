@@ -88,6 +88,8 @@ class _LogTile extends StatelessWidget {
         return Icons.download;
       case ActivityType.upload:
         return Icons.upload;
+      case ActivityType.delete:
+        return Icons.delete;
       case ActivityType.error:
         return Icons.error_outline;
     }
@@ -96,6 +98,7 @@ class _LogTile extends StatelessWidget {
   Color _colorFor(ActivityType type) {
     switch (type) {
       case ActivityType.error:
+      case ActivityType.delete:
         return AppColors.danger.value;
       case ActivityType.serverStarted:
       case ActivityType.download:

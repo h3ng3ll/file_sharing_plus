@@ -9,6 +9,7 @@ enum ActivityType {
   connection,
   download,
   upload,
+  delete,
   error,
 }
 

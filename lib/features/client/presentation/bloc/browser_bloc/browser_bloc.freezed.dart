@@ -55,7 +55,7 @@ extension BrowserEventPatterns on BrowserEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Init value)?  init,TResult Function( _LoadFiles value)?  loadFiles,TResult Function( _StartWatching value)?  startWatching,TResult Function( _OpenFolder value)?  openFolder,TResult Function( _GoUp value)?  goUp,TResult Function( _Download value)?  download,TResult Function( _PickAndUpload value)?  pickAndUpload,TResult Function( _TransferFinished value)?  transferFinished,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Init value)?  init,TResult Function( _LoadFiles value)?  loadFiles,TResult Function( _StartWatching value)?  startWatching,TResult Function( _OpenFolder value)?  openFolder,TResult Function( _GoUp value)?  goUp,TResult Function( _Download value)?  download,TResult Function( _DeleteFile value)?  deleteFile,TResult Function( _PickAndUpload value)?  pickAndUpload,TResult Function( _TransferFinished value)?  transferFinished,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Init() when init != null:
@@ -64,7 +64,8 @@ return loadFiles(_that);case _StartWatching() when startWatching != null:
 return startWatching(_that);case _OpenFolder() when openFolder != null:
 return openFolder(_that);case _GoUp() when goUp != null:
 return goUp(_that);case _Download() when download != null:
-return download(_that);case _PickAndUpload() when pickAndUpload != null:
+return download(_that);case _DeleteFile() when deleteFile != null:
+return deleteFile(_that);case _PickAndUpload() when pickAndUpload != null:
 return pickAndUpload(_that);case _TransferFinished() when transferFinished != null:
 return transferFinished(_that);case _:
   return orElse();
@@ -84,7 +85,7 @@ return transferFinished(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Init value)  init,required TResult Function( _LoadFiles value)  loadFiles,required TResult Function( _StartWatching value)  startWatching,required TResult Function( _OpenFolder value)  openFolder,required TResult Function( _GoUp value)  goUp,required TResult Function( _Download value)  download,required TResult Function( _PickAndUpload value)  pickAndUpload,required TResult Function( _TransferFinished value)  transferFinished,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Init value)  init,required TResult Function( _LoadFiles value)  loadFiles,required TResult Function( _StartWatching value)  startWatching,required TResult Function( _OpenFolder value)  openFolder,required TResult Function( _GoUp value)  goUp,required TResult Function( _Download value)  download,required TResult Function( _DeleteFile value)  deleteFile,required TResult Function( _PickAndUpload value)  pickAndUpload,required TResult Function( _TransferFinished value)  transferFinished,}){
 final _that = this;
 switch (_that) {
 case _Init():
@@ -93,7 +94,8 @@ return loadFiles(_that);case _StartWatching():
 return startWatching(_that);case _OpenFolder():
 return openFolder(_that);case _GoUp():
 return goUp(_that);case _Download():
-return download(_that);case _PickAndUpload():
+return download(_that);case _DeleteFile():
+return deleteFile(_that);case _PickAndUpload():
 return pickAndUpload(_that);case _TransferFinished():
 return transferFinished(_that);}
 }
@@ -109,7 +111,7 @@ return transferFinished(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Init value)?  init,TResult? Function( _LoadFiles value)?  loadFiles,TResult? Function( _StartWatching value)?  startWatching,TResult? Function( _OpenFolder value)?  openFolder,TResult? Function( _GoUp value)?  goUp,TResult? Function( _Download value)?  download,TResult? Function( _PickAndUpload value)?  pickAndUpload,TResult? Function( _TransferFinished value)?  transferFinished,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Init value)?  init,TResult? Function( _LoadFiles value)?  loadFiles,TResult? Function( _StartWatching value)?  startWatching,TResult? Function( _OpenFolder value)?  openFolder,TResult? Function( _GoUp value)?  goUp,TResult? Function( _Download value)?  download,TResult? Function( _DeleteFile value)?  deleteFile,TResult? Function( _PickAndUpload value)?  pickAndUpload,TResult? Function( _TransferFinished value)?  transferFinished,}){
 final _that = this;
 switch (_that) {
 case _Init() when init != null:
@@ -118,7 +120,8 @@ return loadFiles(_that);case _StartWatching() when startWatching != null:
 return startWatching(_that);case _OpenFolder() when openFolder != null:
 return openFolder(_that);case _GoUp() when goUp != null:
 return goUp(_that);case _Download() when download != null:
-return download(_that);case _PickAndUpload() when pickAndUpload != null:
+return download(_that);case _DeleteFile() when deleteFile != null:
+return deleteFile(_that);case _PickAndUpload() when pickAndUpload != null:
 return pickAndUpload(_that);case _TransferFinished() when transferFinished != null:
 return transferFinished(_that);case _:
   return null;
@@ -137,7 +140,7 @@ return transferFinished(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( DiscoveredServer server)?  init,TResult Function()?  loadFiles,TResult Function()?  startWatching,TResult Function( String name)?  openFolder,TResult Function()?  goUp,TResult Function( String fileName)?  download,TResult Function()?  pickAndUpload,TResult Function( String fileName,  TransferDirection direction,  bool success,  String? savedPath)?  transferFinished,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( DiscoveredServer server)?  init,TResult Function()?  loadFiles,TResult Function()?  startWatching,TResult Function( String name)?  openFolder,TResult Function()?  goUp,TResult Function( String fileName)?  download,TResult Function( String fileName)?  deleteFile,TResult Function()?  pickAndUpload,TResult Function( String fileName,  TransferDirection direction,  bool success,  String? savedPath)?  transferFinished,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Init() when init != null:
 return init(_that.server);case _LoadFiles() when loadFiles != null:
@@ -145,7 +148,8 @@ return loadFiles();case _StartWatching() when startWatching != null:
 return startWatching();case _OpenFolder() when openFolder != null:
 return openFolder(_that.name);case _GoUp() when goUp != null:
 return goUp();case _Download() when download != null:
-return download(_that.fileName);case _PickAndUpload() when pickAndUpload != null:
+return download(_that.fileName);case _DeleteFile() when deleteFile != null:
+return deleteFile(_that.fileName);case _PickAndUpload() when pickAndUpload != null:
 return pickAndUpload();case _TransferFinished() when transferFinished != null:
 return transferFinished(_that.fileName,_that.direction,_that.success,_that.savedPath);case _:
   return orElse();
@@ -165,7 +169,7 @@ return transferFinished(_that.fileName,_that.direction,_that.success,_that.saved
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( DiscoveredServer server)  init,required TResult Function()  loadFiles,required TResult Function()  startWatching,required TResult Function( String name)  openFolder,required TResult Function()  goUp,required TResult Function( String fileName)  download,required TResult Function()  pickAndUpload,required TResult Function( String fileName,  TransferDirection direction,  bool success,  String? savedPath)  transferFinished,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( DiscoveredServer server)  init,required TResult Function()  loadFiles,required TResult Function()  startWatching,required TResult Function( String name)  openFolder,required TResult Function()  goUp,required TResult Function( String fileName)  download,required TResult Function( String fileName)  deleteFile,required TResult Function()  pickAndUpload,required TResult Function( String fileName,  TransferDirection direction,  bool success,  String? savedPath)  transferFinished,}) {final _that = this;
 switch (_that) {
 case _Init():
 return init(_that.server);case _LoadFiles():
@@ -173,7 +177,8 @@ return loadFiles();case _StartWatching():
 return startWatching();case _OpenFolder():
 return openFolder(_that.name);case _GoUp():
 return goUp();case _Download():
-return download(_that.fileName);case _PickAndUpload():
+return download(_that.fileName);case _DeleteFile():
+return deleteFile(_that.fileName);case _PickAndUpload():
 return pickAndUpload();case _TransferFinished():
 return transferFinished(_that.fileName,_that.direction,_that.success,_that.savedPath);}
 }
@@ -189,7 +194,7 @@ return transferFinished(_that.fileName,_that.direction,_that.success,_that.saved
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( DiscoveredServer server)?  init,TResult? Function()?  loadFiles,TResult? Function()?  startWatching,TResult? Function( String name)?  openFolder,TResult? Function()?  goUp,TResult? Function( String fileName)?  download,TResult? Function()?  pickAndUpload,TResult? Function( String fileName,  TransferDirection direction,  bool success,  String? savedPath)?  transferFinished,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( DiscoveredServer server)?  init,TResult? Function()?  loadFiles,TResult? Function()?  startWatching,TResult? Function( String name)?  openFolder,TResult? Function()?  goUp,TResult? Function( String fileName)?  download,TResult? Function( String fileName)?  deleteFile,TResult? Function()?  pickAndUpload,TResult? Function( String fileName,  TransferDirection direction,  bool success,  String? savedPath)?  transferFinished,}) {final _that = this;
 switch (_that) {
 case _Init() when init != null:
 return init(_that.server);case _LoadFiles() when loadFiles != null:
@@ -197,7 +202,8 @@ return loadFiles();case _StartWatching() when startWatching != null:
 return startWatching();case _OpenFolder() when openFolder != null:
 return openFolder(_that.name);case _GoUp() when goUp != null:
 return goUp();case _Download() when download != null:
-return download(_that.fileName);case _PickAndUpload() when pickAndUpload != null:
+return download(_that.fileName);case _DeleteFile() when deleteFile != null:
+return deleteFile(_that.fileName);case _PickAndUpload() when pickAndUpload != null:
 return pickAndUpload();case _TransferFinished() when transferFinished != null:
 return transferFinished(_that.fileName,_that.direction,_that.success,_that.savedPath);case _:
   return null;
@@ -504,6 +510,72 @@ as String,
 /// @nodoc
 
 
+class _DeleteFile implements BrowserEvent {
+  const _DeleteFile(this.fileName);
+  
+
+ final  String fileName;
+
+/// Create a copy of BrowserEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$DeleteFileCopyWith<_DeleteFile> get copyWith => __$DeleteFileCopyWithImpl<_DeleteFile>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DeleteFile&&(identical(other.fileName, fileName) || other.fileName == fileName));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,fileName);
+
+@override
+String toString() {
+  return 'BrowserEvent.deleteFile(fileName: $fileName)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$DeleteFileCopyWith<$Res> implements $BrowserEventCopyWith<$Res> {
+  factory _$DeleteFileCopyWith(_DeleteFile value, $Res Function(_DeleteFile) _then) = __$DeleteFileCopyWithImpl;
+@useResult
+$Res call({
+ String fileName
+});
+
+
+
+
+}
+/// @nodoc
+class __$DeleteFileCopyWithImpl<$Res>
+    implements _$DeleteFileCopyWith<$Res> {
+  __$DeleteFileCopyWithImpl(this._self, this._then);
+
+  final _DeleteFile _self;
+  final $Res Function(_DeleteFile) _then;
+
+/// Create a copy of BrowserEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? fileName = null,}) {
+  return _then(_DeleteFile(
+null == fileName ? _self.fileName : fileName // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
 class _PickAndUpload implements BrowserEvent {
   const _PickAndUpload();
   
@@ -610,7 +682,9 @@ mixin _$BrowserState {
 
  BrowserStatus get status; DiscoveredServer? get server; String get path; List<FileEntry> get files; TransferProgress? get progress;/// The most recently finished transfer (drives the per-transfer toast and
 /// the optional Save-to-Files prompt). History itself lives in HistoryBloc.
- TransferRecord? get lastTransfer; String get errorMessage;
+ TransferRecord? get lastTransfer;/// One-shot informational message (e.g. "Deleted <file>") for the page to
+/// surface as a success toast.
+ String? get infoMessage; String get errorMessage;
 /// Create a copy of BrowserState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -621,16 +695,16 @@ $BrowserStateCopyWith<BrowserState> get copyWith => _$BrowserStateCopyWithImpl<B
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is BrowserState&&(identical(other.status, status) || other.status == status)&&(identical(other.server, server) || other.server == server)&&(identical(other.path, path) || other.path == path)&&const DeepCollectionEquality().equals(other.files, files)&&(identical(other.progress, progress) || other.progress == progress)&&(identical(other.lastTransfer, lastTransfer) || other.lastTransfer == lastTransfer)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is BrowserState&&(identical(other.status, status) || other.status == status)&&(identical(other.server, server) || other.server == server)&&(identical(other.path, path) || other.path == path)&&const DeepCollectionEquality().equals(other.files, files)&&(identical(other.progress, progress) || other.progress == progress)&&(identical(other.lastTransfer, lastTransfer) || other.lastTransfer == lastTransfer)&&(identical(other.infoMessage, infoMessage) || other.infoMessage == infoMessage)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,server,path,const DeepCollectionEquality().hash(files),progress,lastTransfer,errorMessage);
+int get hashCode => Object.hash(runtimeType,status,server,path,const DeepCollectionEquality().hash(files),progress,lastTransfer,infoMessage,errorMessage);
 
 @override
 String toString() {
-  return 'BrowserState(status: $status, server: $server, path: $path, files: $files, progress: $progress, lastTransfer: $lastTransfer, errorMessage: $errorMessage)';
+  return 'BrowserState(status: $status, server: $server, path: $path, files: $files, progress: $progress, lastTransfer: $lastTransfer, infoMessage: $infoMessage, errorMessage: $errorMessage)';
 }
 
 
@@ -641,7 +715,7 @@ abstract mixin class $BrowserStateCopyWith<$Res>  {
   factory $BrowserStateCopyWith(BrowserState value, $Res Function(BrowserState) _then) = _$BrowserStateCopyWithImpl;
 @useResult
 $Res call({
- BrowserStatus status, DiscoveredServer? server, String path, List<FileEntry> files, TransferProgress? progress, TransferRecord? lastTransfer, String errorMessage
+ BrowserStatus status, DiscoveredServer? server, String path, List<FileEntry> files, TransferProgress? progress, TransferRecord? lastTransfer, String? infoMessage, String errorMessage
 });
 
 
@@ -658,7 +732,7 @@ class _$BrowserStateCopyWithImpl<$Res>
 
 /// Create a copy of BrowserState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? server = freezed,Object? path = null,Object? files = null,Object? progress = freezed,Object? lastTransfer = freezed,Object? errorMessage = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? server = freezed,Object? path = null,Object? files = null,Object? progress = freezed,Object? lastTransfer = freezed,Object? infoMessage = freezed,Object? errorMessage = null,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as BrowserStatus,server: freezed == server ? _self.server : server // ignore: cast_nullable_to_non_nullable
@@ -666,7 +740,8 @@ as DiscoveredServer?,path: null == path ? _self.path : path // ignore: cast_null
 as String,files: null == files ? _self.files : files // ignore: cast_nullable_to_non_nullable
 as List<FileEntry>,progress: freezed == progress ? _self.progress : progress // ignore: cast_nullable_to_non_nullable
 as TransferProgress?,lastTransfer: freezed == lastTransfer ? _self.lastTransfer : lastTransfer // ignore: cast_nullable_to_non_nullable
-as TransferRecord?,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as TransferRecord?,infoMessage: freezed == infoMessage ? _self.infoMessage : infoMessage // ignore: cast_nullable_to_non_nullable
+as String?,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -773,10 +848,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( BrowserStatus status,  DiscoveredServer? server,  String path,  List<FileEntry> files,  TransferProgress? progress,  TransferRecord? lastTransfer,  String errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( BrowserStatus status,  DiscoveredServer? server,  String path,  List<FileEntry> files,  TransferProgress? progress,  TransferRecord? lastTransfer,  String? infoMessage,  String errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _BrowserState() when $default != null:
-return $default(_that.status,_that.server,_that.path,_that.files,_that.progress,_that.lastTransfer,_that.errorMessage);case _:
+return $default(_that.status,_that.server,_that.path,_that.files,_that.progress,_that.lastTransfer,_that.infoMessage,_that.errorMessage);case _:
   return orElse();
 
 }
@@ -794,10 +869,10 @@ return $default(_that.status,_that.server,_that.path,_that.files,_that.progress,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( BrowserStatus status,  DiscoveredServer? server,  String path,  List<FileEntry> files,  TransferProgress? progress,  TransferRecord? lastTransfer,  String errorMessage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( BrowserStatus status,  DiscoveredServer? server,  String path,  List<FileEntry> files,  TransferProgress? progress,  TransferRecord? lastTransfer,  String? infoMessage,  String errorMessage)  $default,) {final _that = this;
 switch (_that) {
 case _BrowserState():
-return $default(_that.status,_that.server,_that.path,_that.files,_that.progress,_that.lastTransfer,_that.errorMessage);}
+return $default(_that.status,_that.server,_that.path,_that.files,_that.progress,_that.lastTransfer,_that.infoMessage,_that.errorMessage);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -811,10 +886,10 @@ return $default(_that.status,_that.server,_that.path,_that.files,_that.progress,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( BrowserStatus status,  DiscoveredServer? server,  String path,  List<FileEntry> files,  TransferProgress? progress,  TransferRecord? lastTransfer,  String errorMessage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( BrowserStatus status,  DiscoveredServer? server,  String path,  List<FileEntry> files,  TransferProgress? progress,  TransferRecord? lastTransfer,  String? infoMessage,  String errorMessage)?  $default,) {final _that = this;
 switch (_that) {
 case _BrowserState() when $default != null:
-return $default(_that.status,_that.server,_that.path,_that.files,_that.progress,_that.lastTransfer,_that.errorMessage);case _:
+return $default(_that.status,_that.server,_that.path,_that.files,_that.progress,_that.lastTransfer,_that.infoMessage,_that.errorMessage);case _:
   return null;
 
 }
@@ -826,7 +901,7 @@ return $default(_that.status,_that.server,_that.path,_that.files,_that.progress,
 
 
 class _BrowserState implements BrowserState {
-  const _BrowserState({this.status = BrowserStatus.initial, this.server, this.path = '', final  List<FileEntry> files = const <FileEntry>[], this.progress, this.lastTransfer, this.errorMessage = ''}): _files = files;
+  const _BrowserState({this.status = BrowserStatus.initial, this.server, this.path = '', final  List<FileEntry> files = const <FileEntry>[], this.progress, this.lastTransfer, this.infoMessage, this.errorMessage = ''}): _files = files;
   
 
 @override@JsonKey() final  BrowserStatus status;
@@ -843,6 +918,9 @@ class _BrowserState implements BrowserState {
 /// The most recently finished transfer (drives the per-transfer toast and
 /// the optional Save-to-Files prompt). History itself lives in HistoryBloc.
 @override final  TransferRecord? lastTransfer;
+/// One-shot informational message (e.g. "Deleted <file>") for the page to
+/// surface as a success toast.
+@override final  String? infoMessage;
 @override@JsonKey() final  String errorMessage;
 
 /// Create a copy of BrowserState
@@ -855,16 +933,16 @@ _$BrowserStateCopyWith<_BrowserState> get copyWith => __$BrowserStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _BrowserState&&(identical(other.status, status) || other.status == status)&&(identical(other.server, server) || other.server == server)&&(identical(other.path, path) || other.path == path)&&const DeepCollectionEquality().equals(other._files, _files)&&(identical(other.progress, progress) || other.progress == progress)&&(identical(other.lastTransfer, lastTransfer) || other.lastTransfer == lastTransfer)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _BrowserState&&(identical(other.status, status) || other.status == status)&&(identical(other.server, server) || other.server == server)&&(identical(other.path, path) || other.path == path)&&const DeepCollectionEquality().equals(other._files, _files)&&(identical(other.progress, progress) || other.progress == progress)&&(identical(other.lastTransfer, lastTransfer) || other.lastTransfer == lastTransfer)&&(identical(other.infoMessage, infoMessage) || other.infoMessage == infoMessage)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,server,path,const DeepCollectionEquality().hash(_files),progress,lastTransfer,errorMessage);
+int get hashCode => Object.hash(runtimeType,status,server,path,const DeepCollectionEquality().hash(_files),progress,lastTransfer,infoMessage,errorMessage);
 
 @override
 String toString() {
-  return 'BrowserState(status: $status, server: $server, path: $path, files: $files, progress: $progress, lastTransfer: $lastTransfer, errorMessage: $errorMessage)';
+  return 'BrowserState(status: $status, server: $server, path: $path, files: $files, progress: $progress, lastTransfer: $lastTransfer, infoMessage: $infoMessage, errorMessage: $errorMessage)';
 }
 
 
@@ -875,7 +953,7 @@ abstract mixin class _$BrowserStateCopyWith<$Res> implements $BrowserStateCopyWi
   factory _$BrowserStateCopyWith(_BrowserState value, $Res Function(_BrowserState) _then) = __$BrowserStateCopyWithImpl;
 @override @useResult
 $Res call({
- BrowserStatus status, DiscoveredServer? server, String path, List<FileEntry> files, TransferProgress? progress, TransferRecord? lastTransfer, String errorMessage
+ BrowserStatus status, DiscoveredServer? server, String path, List<FileEntry> files, TransferProgress? progress, TransferRecord? lastTransfer, String? infoMessage, String errorMessage
 });
 
 
@@ -892,7 +970,7 @@ class __$BrowserStateCopyWithImpl<$Res>
 
 /// Create a copy of BrowserState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? server = freezed,Object? path = null,Object? files = null,Object? progress = freezed,Object? lastTransfer = freezed,Object? errorMessage = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? server = freezed,Object? path = null,Object? files = null,Object? progress = freezed,Object? lastTransfer = freezed,Object? infoMessage = freezed,Object? errorMessage = null,}) {
   return _then(_BrowserState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as BrowserStatus,server: freezed == server ? _self.server : server // ignore: cast_nullable_to_non_nullable
@@ -900,7 +978,8 @@ as DiscoveredServer?,path: null == path ? _self.path : path // ignore: cast_null
 as String,files: null == files ? _self._files : files // ignore: cast_nullable_to_non_nullable
 as List<FileEntry>,progress: freezed == progress ? _self.progress : progress // ignore: cast_nullable_to_non_nullable
 as TransferProgress?,lastTransfer: freezed == lastTransfer ? _self.lastTransfer : lastTransfer // ignore: cast_nullable_to_non_nullable
-as TransferRecord?,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as TransferRecord?,infoMessage: freezed == infoMessage ? _self.infoMessage : infoMessage // ignore: cast_nullable_to_non_nullable
+as String?,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

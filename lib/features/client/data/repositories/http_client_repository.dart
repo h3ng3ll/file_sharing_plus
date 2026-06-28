@@ -71,7 +71,8 @@ class HttpClientRepository implements IClientRepository {
       IOSink? sink;
       try {
         final response = await _dio.get<ResponseBody>(
-          '${_baseUrl(server)}/download/${Uri.encodeComponent(relative)}',
+          '${_baseUrl(server)}/download',
+          queryParameters: {'path': relative},
           options: Options(responseType: ResponseType.stream),
         );
 
@@ -162,6 +163,19 @@ class HttpClientRepository implements IClientRepository {
   FolderWatch watchFiles({required DiscoveredServer server}) {
     return _WebSocketFolderWatch(
       url: 'ws://${server.host}:${server.port}/events',
+    );
+  }
+
+  @override
+  Future<void> deleteFile({
+    required DiscoveredServer server,
+    required String fileName,
+    String path = '',
+  }) async {
+    final relative = path.isEmpty ? fileName : p.join(path, fileName);
+    await _dio.delete<dynamic>(
+      '${_baseUrl(server)}/delete',
+      queryParameters: {'path': relative},
     );
   }
 }

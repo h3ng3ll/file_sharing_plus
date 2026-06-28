@@ -34,4 +34,11 @@ abstract interface class IClientRepository {
   /// Opens a live [FolderWatch] for [server] that streams folder listings and
   /// re-pushes them whenever the server's shared folder changes.
   FolderWatch watchFiles({required DiscoveredServer server});
+
+  /// Deletes [fileName] (relative to [path]) on [server]. Throws on failure.
+  Future<void> deleteFile({
+    required DiscoveredServer server,
+    required String fileName,
+    String path,
+  });
 }

@@ -13,6 +13,7 @@ sealed class BrowserEvent with _$BrowserEvent {
   const factory BrowserEvent.openFolder(String name) = _OpenFolder;
   const factory BrowserEvent.goUp() = _GoUp;
   const factory BrowserEvent.download(String fileName) = _Download;
+  const factory BrowserEvent.deleteFile(String fileName) = _DeleteFile;
   const factory BrowserEvent.pickAndUpload() = _PickAndUpload;
 
   const factory BrowserEvent.transferFinished({

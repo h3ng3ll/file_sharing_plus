@@ -91,6 +91,13 @@ class _FileBrowserPageState extends State<FileBrowserPage> {
                 c.lastTransfer != null && c.lastTransfer != p.lastTransfer,
             listener: (context, state) => _notifyTransfer(state.lastTransfer!),
           ),
+          // One-shot info messages (e.g. a successful delete).
+          BlocListener<BrowserBloc, BrowserState>(
+            listenWhen: (p, c) =>
+                c.infoMessage != null && c.infoMessage != p.infoMessage,
+            listener: (context, state) =>
+                UiMessageService.showSuccess(state.infoMessage!),
+          ),
         ],
         child: Scaffold(
           appBar: CustomAppBar(

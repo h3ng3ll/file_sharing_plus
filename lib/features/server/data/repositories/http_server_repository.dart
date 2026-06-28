@@ -91,8 +91,10 @@ class HttpServerRepository implements IServerRepository {
         await _handlePing(request);
       } else if (request.method == 'GET' && path == '/files') {
         await _handleListFiles(request);
-      } else if (request.method == 'GET' && path.startsWith('/download/')) {
+      } else if (request.method == 'GET' && path == '/download') {
         await _handleDownload(request);
+      } else if (request.method == 'DELETE' && path == '/delete') {
+        await _handleDelete(request);
       } else if (request.method == 'POST' && path == '/upload') {
         await _handleUpload(request);
       } else {
@@ -184,23 +186,23 @@ class HttpServerRepository implements IServerRepository {
       return;
     }
 
-    final relative =
-        Uri.decodeComponent(request.uri.path.substring('/download/'.length));
+    final relative = request.uri.queryParameters['path'] ?? '';
     final file = File(_safeJoin(root, relative));
-    if (!file.existsSync()) {
+    if (relative.isEmpty || !file.existsSync()) {
       request.response.statusCode = HttpStatus.notFound;
       await request.response.close();
       return;
     }
 
     final length = file.lengthSync();
+    final name = p.basename(file.path);
     request.response.statusCode = HttpStatus.ok;
     request.response.headers
       ..contentType = ContentType.binary
       ..contentLength = length
       ..add(
         HttpHeaders.contentDisposition,
-        'attachment; filename="${p.basename(file.path)}"',
+        _contentDisposition(name),
       );
 
     // Stream the file straight to the socket; never load it into memory.
@@ -242,6 +244,43 @@ class HttpServerRepository implements IServerRepository {
     _log(ActivityType.upload, 'Received $fileName');
     // Reflect the new file to browsing clients immediately, without waiting for
     // the filesystem watch to fire.
+    _pushToAllSockets();
+  }
+
+  Future<void> _handleDelete(HttpRequest request) async {
+    final root = _sharedFolder;
+    if (root == null) {
+      request.response.statusCode = HttpStatus.serviceUnavailable;
+      await request.response.close();
+      return;
+    }
+
+    final relative = request.uri.queryParameters['path'] ?? '';
+    if (relative.isEmpty) {
+      request.response.statusCode = HttpStatus.badRequest;
+      await request.response.close();
+      return;
+    }
+    final target = _safeJoin(root, relative);
+    final type = FileSystemEntity.typeSync(target, followLinks: false);
+
+    if (type == FileSystemEntityType.notFound) {
+      request.response.statusCode = HttpStatus.notFound;
+      await request.response.close();
+      return;
+    }
+    // Files only — deleting directories is not supported.
+    if (type == FileSystemEntityType.directory) {
+      request.response.statusCode = HttpStatus.forbidden;
+      await request.response.close();
+      return;
+    }
+
+    File(target).deleteSync();
+    _writeJson(request.response, {'status': 'ok'});
+    await request.response.close();
+    _log(ActivityType.delete, 'Deleted ${p.basename(target)}');
+    // Reflect the removal to browsing clients immediately.
     _pushToAllSockets();
   }
 
@@ -322,6 +361,18 @@ class HttpServerRepository implements IServerRepository {
     } catch (_) {
       // Path no longer valid or socket closed mid-write; ignore.
     }
+  }
+
+  /// Builds a `Content-Disposition` value that survives non-ASCII names.
+  ///
+  /// `dart:io` HTTP headers are Latin-1, so a raw Unicode filename throws.
+  /// We emit an ASCII-only `filename=` fallback plus an RFC 5987
+  /// `filename*=UTF-8''…` with the real (percent-encoded) name.
+  String _contentDisposition(String name) {
+    final asciiFallback = name.replaceAll(RegExp(r'[^\x20-\x7E]|["\\]'), '_');
+    final encoded = Uri.encodeComponent(name);
+    return 'attachment; filename="$asciiFallback"; '
+        "filename*=UTF-8''$encoded";
   }
 
   /// Joins [relative] onto [root], rejecting any path that escapes [root].

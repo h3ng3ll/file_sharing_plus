@@ -7,6 +7,7 @@ import '../data/repositories/http_client_repository.dart';
 import '../domain/models/transfer_record.dart';
 import '../domain/repositories/i_client_repository.dart';
 import '../domain/repositories/i_history_repository.dart';
+import '../domain/use_cases/delete_file_use_case.dart';
 import '../domain/use_cases/discover_servers_use_case.dart';
 import '../domain/use_cases/download_file_use_case.dart';
 import '../domain/use_cases/list_files_use_case.dart';
@@ -64,6 +65,11 @@ void initClientFeature(GetIt getIt) {
       historyRepository: getIt<IHistoryRepository>(),
     ),
   );
+  getIt.registerFactory(
+    () => DeleteFileUseCase(
+      clientRepository: getIt<IClientRepository>(),
+    ),
+  );
 
   getIt.registerFactory<DiscoveryBloc>(
     () => DiscoveryBloc(
@@ -78,6 +84,7 @@ void initClientFeature(GetIt getIt) {
       uploadFileUseCase: getIt<UploadFileUseCase>(),
       watchFilesUseCase: getIt<WatchFilesUseCase>(),
       recordTransferUseCase: getIt<RecordTransferUseCase>(),
+      deleteFileUseCase: getIt<DeleteFileUseCase>(),
     ),
   );
   getIt.registerFactory<HistoryBloc>(

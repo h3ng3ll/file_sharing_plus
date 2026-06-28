@@ -27,6 +27,10 @@ sealed class BrowserState with _$BrowserState {
     /// The most recently finished transfer (drives the per-transfer toast and
     /// the optional Save-to-Files prompt). History itself lives in HistoryBloc.
     TransferRecord? lastTransfer,
+
+    /// One-shot informational message (e.g. "Deleted my-file") for the page to
+    /// surface as a success toast.
+    String? infoMessage,
     @Default('') String errorMessage,
   }) = _BrowserState;
 }
