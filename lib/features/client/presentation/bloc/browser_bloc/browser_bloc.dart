@@ -75,20 +75,20 @@ class BrowserBloc extends Bloc<BrowserEvent, BrowserState> {
     final server = state.server;
     if (server == null) return;
     emit(state.copyWith(status: BrowserStatus.loading));
-    try {
-      final files = await _listFilesUseCase(
-        server: server,
-        path: state.path,
-      );
-      emit(state.copyWith(status: BrowserStatus.loaded, files: files));
-    } catch (e) {
-      emit(
+    final result = await _listFilesUseCase(
+      server: server,
+      path: state.path,
+    );
+    result.fold(
+      (files) =>
+          emit(state.copyWith(status: BrowserStatus.loaded, files: files)),
+      (failure) => emit(
         state.copyWith(
           status: BrowserStatus.failure,
-          errorMessage: e.toString(),
+          errorMessage: failure.message,
         ),
-      );
-    }
+      ),
+    );
   }
 
   void _openFolder(_OpenFolder event, Emitter<BrowserState> emit) {

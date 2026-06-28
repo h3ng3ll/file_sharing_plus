@@ -6,6 +6,7 @@ import '../domain/repositories/i_client_repository.dart';
 import '../domain/use_cases/discover_servers_use_case.dart';
 import '../domain/use_cases/download_file_use_case.dart';
 import '../domain/use_cases/list_files_use_case.dart';
+import '../domain/use_cases/ping_server_use_case.dart';
 import '../domain/use_cases/upload_file_use_case.dart';
 import '../domain/use_cases/watch_files_use_case.dart';
 import '../presentation/bloc/browser_bloc/browser_bloc.dart';
@@ -42,11 +43,16 @@ void initClientFeature(GetIt getIt) {
       clientRepository: getIt<IClientRepository>(),
     ),
   );
+  getIt.registerFactory(
+    () => PingServerUseCase(
+      clientRepository: getIt<IClientRepository>(),
+    ),
+  );
 
   getIt.registerFactory<DiscoveryBloc>(
     () => DiscoveryBloc(
       discoverServersUseCase: getIt<DiscoverServersUseCase>(),
-      clientRepository: getIt<IClientRepository>(),
+      pingServerUseCase: getIt<PingServerUseCase>(),
     ),
   );
   getIt.registerFactory<BrowserBloc>(

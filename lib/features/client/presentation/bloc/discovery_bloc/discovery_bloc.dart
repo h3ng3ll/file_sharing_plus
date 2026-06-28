@@ -2,8 +2,8 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../../../core/services/discovery_service.dart';
-import '../../../domain/repositories/i_client_repository.dart';
 import '../../../domain/use_cases/discover_servers_use_case.dart';
+import '../../../domain/use_cases/ping_server_use_case.dart';
 
 part 'discovery_event.dart';
 part 'discovery_state.dart';
@@ -12,13 +12,13 @@ part 'discovery_bloc.freezed.dart';
 /// Drives the iOS device-list screen: mDNS discovery plus manual entries.
 class DiscoveryBloc extends Bloc<DiscoveryEvent, DiscoveryState> {
   final DiscoverServersUseCase _discoverServersUseCase;
-  final IClientRepository _clientRepository;
+  final PingServerUseCase _pingServerUseCase;
 
   DiscoveryBloc({
     required DiscoverServersUseCase discoverServersUseCase,
-    required IClientRepository clientRepository,
+    required PingServerUseCase pingServerUseCase,
   })  : _discoverServersUseCase = discoverServersUseCase,
-        _clientRepository = clientRepository,
+        _pingServerUseCase = pingServerUseCase,
         super(const DiscoveryState()) {
     on<_Start>(_start);
     on<_DiscoveredUpdated>(_discoveredUpdated);
@@ -59,31 +59,31 @@ class DiscoveryBloc extends Bloc<DiscoveryEvent, DiscoveryState> {
     Emitter<DiscoveryState> emit,
   ) async {
     emit(state.copyWith(status: DiscoveryStatus.validatingManual));
-    final reachable = await _clientRepository.ping(
+    final result = await _pingServerUseCase(
       host: event.host,
       port: event.port,
     );
-    if (!reachable) {
-      emit(
+    result.fold(
+      (_) {
+        final server = DiscoveredServer(
+          name: '${event.host} (manual)',
+          host: event.host,
+          port: event.port,
+          isManual: true,
+        );
+        final manual = {...state.manual, server}.toList();
+        emit(
+          state.copyWith(
+            status: DiscoveryStatus.discovering,
+            manual: manual,
+          ),
+        );
+      },
+      (failure) => emit(
         state.copyWith(
           status: DiscoveryStatus.failure,
-          errorMessage: 'No server reachable at ${event.host}:${event.port}',
+          errorMessage: failure.message,
         ),
-      );
-      return;
-    }
-
-    final server = DiscoveredServer(
-      name: '${event.host} (manual)',
-      host: event.host,
-      port: event.port,
-      isManual: true,
-    );
-    final manual = {...state.manual, server}.toList();
-    emit(
-      state.copyWith(
-        status: DiscoveryStatus.discovering,
-        manual: manual,
       ),
     );
   }

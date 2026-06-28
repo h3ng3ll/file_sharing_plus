@@ -5,6 +5,7 @@ import '../../../core/services/network_info_service.dart';
 import '../data/repositories/http_server_repository.dart';
 import '../domain/repositories/i_server_repository.dart';
 import '../domain/use_cases/select_folder_use_case.dart';
+import '../domain/use_cases/server_session_use_case.dart';
 import '../domain/use_cases/start_server_use_case.dart';
 import '../domain/use_cases/stop_server_use_case.dart';
 import '../presentation/bloc/server_bloc/server_bloc.dart';
@@ -31,10 +32,15 @@ void initServerFeature(GetIt getIt) {
   getIt.registerFactory(
     () => const SelectFolderUseCase(),
   );
+  getIt.registerFactory(
+    () => ServerSessionUseCase(
+      serverRepository: getIt<IServerRepository>(),
+    ),
+  );
 
   getIt.registerFactory<ServerBloc>(
     () => ServerBloc(
-      serverRepository: getIt<IServerRepository>(),
+      serverSessionUseCase: getIt<ServerSessionUseCase>(),
       startServerUseCase: getIt<StartServerUseCase>(),
       stopServerUseCase: getIt<StopServerUseCase>(),
       selectFolderUseCase: getIt<SelectFolderUseCase>(),

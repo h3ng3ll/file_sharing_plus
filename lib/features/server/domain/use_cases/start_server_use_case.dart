@@ -1,7 +1,11 @@
 import 'dart:io';
 
+import 'package:dartz/dartz.dart';
+
+import '../../../../core/failures/failure.dart';
 import '../../../../core/services/discovery_service.dart';
 import '../../../../core/services/network_info_service.dart';
+import '../failures/start_server_failure.dart';
 import '../repositories/i_server_repository.dart';
 
 /// Result of a successful server start.
@@ -30,18 +34,26 @@ class StartServerUseCase {
         _networkInfoService = networkInfoService;
 
   /// Starts the server and registers the Bonjour service.
-  Future<StartServerResult> call({int port = 8080}) async {
-    final boundPort = await _serverRepository.start(port: port);
-    final ip = await _networkInfoService.getLocalIpAddress();
+  ///
+  /// Left = [StartServerResult]; Right = [StartServerFailure] on error.
+  Future<Either<StartServerResult, Failure>> call({int port = 8080}) async {
+    try {
+      final boundPort = await _serverRepository.start(port: port);
+      final ip = await _networkInfoService.getLocalIpAddress();
 
-    await _discoveryService.registerServer(
-      name: '${Platform.localHostname} File Sharing',
-      port: boundPort,
-    );
+      await _discoveryService.registerServer(
+        name: '${Platform.localHostname} File Sharing',
+        port: boundPort,
+      );
 
-    return StartServerResult(
-      port: boundPort,
-      ipAddress: ip,
-    );
+      return Left(
+        StartServerResult(
+          port: boundPort,
+          ipAddress: ip,
+        ),
+      );
+    } catch (e) {
+      return Right(StartServerFailure(e.toString()));
+    }
   }
 }

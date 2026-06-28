@@ -7,8 +7,8 @@ import 'package:path/path.dart' as p;
 import '../../../../../core/models/file_entry/file_entry.dart';
 import '../../../domain/models/activity_log_entry.dart';
 import '../../../domain/models/connected_device.dart';
-import '../../../domain/repositories/i_server_repository.dart';
 import '../../../domain/use_cases/select_folder_use_case.dart';
+import '../../../domain/use_cases/server_session_use_case.dart';
 import '../../../domain/use_cases/start_server_use_case.dart';
 import '../../../domain/use_cases/stop_server_use_case.dart';
 
@@ -18,17 +18,17 @@ part 'server_bloc.freezed.dart';
 
 /// Drives the macOS server screen: start/stop, shared folder, live activity.
 class ServerBloc extends Bloc<ServerEvent, ServerState> {
-  final IServerRepository _serverRepository;
+  final ServerSessionUseCase _serverSessionUseCase;
   final StartServerUseCase _startServerUseCase;
   final StopServerUseCase _stopServerUseCase;
   final SelectFolderUseCase _selectFolderUseCase;
 
   ServerBloc({
-    required IServerRepository serverRepository,
+    required ServerSessionUseCase serverSessionUseCase,
     required StartServerUseCase startServerUseCase,
     required StopServerUseCase stopServerUseCase,
     required SelectFolderUseCase selectFolderUseCase,
-  })  : _serverRepository = serverRepository,
+  })  : _serverSessionUseCase = serverSessionUseCase,
         _startServerUseCase = startServerUseCase,
         _stopServerUseCase = stopServerUseCase,
         _selectFolderUseCase = selectFolderUseCase,
@@ -43,10 +43,10 @@ class ServerBloc extends Bloc<ServerEvent, ServerState> {
   }
 
   void _init(_Init event, Emitter<ServerState> emit) {
-    _serverRepository.connectedDevices.listen(
+    _serverSessionUseCase.connectedDevices.listen(
       (devices) => add(ServerEvent.devicesUpdated(devices)),
     );
-    _serverRepository.activityLog.listen(
+    _serverSessionUseCase.activityLog.listen(
       (entry) => add(ServerEvent.logReceived(entry)),
     );
   }
@@ -56,56 +56,69 @@ class ServerBloc extends Bloc<ServerEvent, ServerState> {
     Emitter<ServerState> emit,
   ) async {
     emit(state.copyWith(status: ServerStatus.starting));
-    try {
-      final result = await _startServerUseCase(port: state.port);
-      emit(
+    final result = await _startServerUseCase(port: state.port);
+    result.fold(
+      (data) => emit(
         state.copyWith(
           status: ServerStatus.running,
-          port: result.port,
-          ipAddress: result.ipAddress,
+          port: data.port,
+          ipAddress: data.ipAddress,
         ),
-      );
-    } catch (e) {
-      emit(
+      ),
+      (failure) => emit(
         state.copyWith(
           status: ServerStatus.failure,
-          errorMessage: e.toString(),
+          errorMessage: failure.message,
         ),
-      );
-    }
+      ),
+    );
   }
 
   Future<void> _stopServer(
     _StopServer event,
     Emitter<ServerState> emit,
   ) async {
-    try {
-      await _stopServerUseCase();
-      emit(
+    final result = await _stopServerUseCase();
+    result.fold(
+      (_) => emit(
         state.copyWith(
           status: ServerStatus.stopped,
           devices: const [],
         ),
-      );
-    } catch (e) {
-      emit(
+      ),
+      (failure) => emit(
         state.copyWith(
           status: ServerStatus.failure,
-          errorMessage: e.toString(),
+          errorMessage: failure.message,
         ),
-      );
-    }
+      ),
+    );
   }
 
   Future<void> _selectFolder(
     _SelectFolder event,
     Emitter<ServerState> emit,
   ) async {
-    final path = await _selectFolderUseCase();
-    if (path == null) return;
-    _serverRepository.setSharedFolder(path);
-    emit(state.copyWith(sharedFolder: path));
-    add(const ServerEvent.refreshFiles());
+    final result = await _selectFolderUseCase();
+    await result.fold(
+      (path) async {
+        final setResult = await _serverSessionUseCase.setSharedFolder(path);
+        setResult.fold(
+          (_) {
+            emit(state.copyWith(sharedFolder: path));
+            add(const ServerEvent.refreshFiles());
+          },
+          (failure) => emit(
+            state.copyWith(
+              status: ServerStatus.failure,
+              errorMessage: failure.message,
+            ),
+          ),
+        );
+      },
+      // Cancellation (SelectFolderCancelledFailure) → no-op.
+      (failure) async {},
+    );
   }
 
   Future<void> _refreshFiles(
