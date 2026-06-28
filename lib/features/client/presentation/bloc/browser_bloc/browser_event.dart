@@ -6,6 +6,10 @@ sealed class BrowserEvent with _$BrowserEvent {
   const factory BrowserEvent.init(DiscoveredServer server) = _Init;
 
   const factory BrowserEvent.loadFiles() = _LoadFiles;
+
+  /// Starts the long-lived subscription to server-pushed folder listings.
+  const factory BrowserEvent.startWatching() = _StartWatching;
+
   const factory BrowserEvent.openFolder(String name) = _OpenFolder;
   const factory BrowserEvent.goUp() = _GoUp;
   const factory BrowserEvent.download(String fileName) = _Download;

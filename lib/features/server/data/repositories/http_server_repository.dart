@@ -19,6 +19,15 @@ class HttpServerRepository implements IServerRepository {
   HttpServer? _server;
   String? _sharedFolder;
 
+  /// Connected event sockets, each tracking the folder path it is watching.
+  final _sockets = <WebSocket, String>{};
+
+  /// Active filesystem watch on the shared folder, if any.
+  StreamSubscription<FileSystemEvent>? _folderWatch;
+
+  /// Coalesces bursts of filesystem events into a single push.
+  Timer? _watchDebounce;
+
   final _devices = <String, ConnectedDevice>{};
   final _devicesController =
       StreamController<List<ConnectedDevice>>.broadcast();
@@ -34,6 +43,10 @@ class HttpServerRepository implements IServerRepository {
   @override
   void setSharedFolder(String path) {
     _sharedFolder = path;
+    // Re-target the filesystem watch and push fresh listings to every client
+    // so a folder change on the Mac is reflected immediately.
+    _startFolderWatch();
+    _pushToAllSockets();
   }
 
   @override
@@ -44,11 +57,22 @@ class HttpServerRepository implements IServerRepository {
     _log(ActivityType.serverStarted, 'Server started on port ${server.port}');
 
     unawaited(server.forEach(_handleRequest));
+    _startFolderWatch();
     return server.port;
   }
 
   @override
   Future<void> stop() async {
+    await _folderWatch?.cancel();
+    _folderWatch = null;
+    _watchDebounce?.cancel();
+    _watchDebounce = null;
+
+    for (final socket in _sockets.keys.toList()) {
+      await socket.close();
+    }
+    _sockets.clear();
+
     final server = _server;
     if (server != null) {
       await server.close(force: true);
@@ -61,7 +85,9 @@ class HttpServerRepository implements IServerRepository {
     _trackDevice(request);
     try {
       final path = request.uri.path;
-      if (request.method == 'GET' && path == '/ping') {
+      if (request.method == 'GET' && path == '/events') {
+        await _handleEvents(request);
+      } else if (request.method == 'GET' && path == '/ping') {
         await _handlePing(request);
       } else if (request.method == 'GET' && path == '/files') {
         await _handleListFiles(request);
@@ -93,20 +119,32 @@ class HttpServerRepository implements IServerRepository {
   }
 
   Future<void> _handleListFiles(HttpRequest request) async {
-    final root = _sharedFolder;
-    if (root == null) {
-      _writeJson(request.response, {'files': <dynamic>[]});
-      await request.response.close();
-      return;
-    }
-
     final relative = request.uri.queryParameters['path'] ?? '';
-    final dir = Directory(_safeJoin(root, relative));
-    if (!dir.existsSync()) {
+    final entries = await _scanFolder(relative);
+    if (entries == null) {
       request.response.statusCode = HttpStatus.notFound;
       await request.response.close();
       return;
     }
+
+    _writeJson(request.response, {
+      'files': entries.map((e) => e.toJson()).toList(),
+    });
+    await request.response.close();
+  }
+
+  /// Lists the shared folder's contents at [relative], sorted folders-first
+  /// then alphabetically. Returns an empty list when no folder is shared, or
+  /// `null` when the requested path does not exist.
+  ///
+  /// Single source of truth for the listing exposed by both `GET /files` and
+  /// the WebSocket event stream.
+  Future<List<FileEntry>?> _scanFolder(String relative) async {
+    final root = _sharedFolder;
+    if (root == null) return const <FileEntry>[];
+
+    final dir = Directory(_safeJoin(root, relative));
+    if (!dir.existsSync()) return null;
 
     final entries = <FileEntry>[];
     await for (final entity in dir.list(followLinks: false)) {
@@ -125,11 +163,7 @@ class HttpServerRepository implements IServerRepository {
       }
       return a.name.toLowerCase().compareTo(b.name.toLowerCase());
     });
-
-    _writeJson(request.response, {
-      'files': entries.map((e) => e.toJson()).toList(),
-    });
-    await request.response.close();
+    return entries;
   }
 
   Future<void> _handleDownload(HttpRequest request) async {
@@ -196,6 +230,88 @@ class HttpServerRepository implements IServerRepository {
     _writeJson(request.response, {'status': 'ok', 'name': fileName});
     await request.response.close();
     _log(ActivityType.upload, 'Received $fileName');
+    // Reflect the new file to browsing clients immediately, without waiting for
+    // the filesystem watch to fire.
+    _pushToAllSockets();
+  }
+
+  /// Upgrades the request to a WebSocket and streams folder listings to the
+  /// client. The client sends `{"type":"watch","path":"<relative>"}`; the
+  /// server replies with the listing for that path and re-pushes it on change.
+  Future<void> _handleEvents(HttpRequest request) async {
+    final socket = await WebSocketTransformer.upgrade(request);
+    _sockets[socket] = '';
+    _log(ActivityType.connection, 'Event stream opened');
+
+    socket.listen(
+      (dynamic message) async {
+        try {
+          final decoded = jsonDecode(message as String) as Map<String, dynamic>;
+          if (decoded['type'] == 'watch') {
+            final path = (decoded['path'] as String?) ?? '';
+            _sockets[socket] = path;
+            await _pushToSocket(socket, path);
+          }
+        } catch (_) {
+          // Ignore malformed client messages.
+        }
+      },
+      onDone: () => _sockets.remove(socket),
+      onError: (_) => _sockets.remove(socket),
+      cancelOnError: true,
+    );
+  }
+
+  /// (Re)starts the recursive filesystem watch on the shared folder.
+  void _startFolderWatch() {
+    _folderWatch?.cancel();
+    _folderWatch = null;
+
+    final root = _sharedFolder;
+    if (root == null) return;
+    final dir = Directory(root);
+    if (!dir.existsSync()) return;
+
+    _folderWatch = dir.watch(recursive: true).listen(
+      (_) => _scheduleWatchPush(),
+      onError: (_) {},
+    );
+  }
+
+  /// Debounces filesystem events so a burst results in a single push.
+  void _scheduleWatchPush() {
+    _watchDebounce?.cancel();
+    _watchDebounce = Timer(
+      const Duration(milliseconds: 250),
+      _pushToAllSockets,
+    );
+  }
+
+  /// Pushes the current listing to every connected socket, each for the path
+  /// it is watching.
+  void _pushToAllSockets() {
+    for (final entry in _sockets.entries) {
+      unawaited(_pushToSocket(entry.key, entry.value));
+    }
+  }
+
+  /// Sends the listing for [path] to a single [socket].
+  Future<void> _pushToSocket(WebSocket socket, String path) async {
+    if (socket.readyState != WebSocket.open) return;
+    try {
+      final entries = await _scanFolder(path);
+      socket.add(
+        jsonEncode({
+          'type': 'files',
+          'path': path,
+          'files': (entries ?? const <FileEntry>[])
+              .map((e) => e.toJson())
+              .toList(),
+        }),
+      );
+    } catch (_) {
+      // Path no longer valid or socket closed mid-write; ignore.
+    }
   }
 
   /// Joins [relative] onto [root], rejecting any path that escapes [root].

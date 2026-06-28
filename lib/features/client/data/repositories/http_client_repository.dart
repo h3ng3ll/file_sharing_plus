@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -8,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import '../../../../core/models/file_entry/file_entry.dart';
 import '../../../../core/services/discovery_service.dart';
 import '../../domain/models/transfer_progress.dart';
+import '../../domain/repositories/folder_watch.dart';
 import '../../domain/repositories/i_client_repository.dart';
 
 /// [Dio]-backed implementation of [IClientRepository].
@@ -153,5 +155,94 @@ class HttpClientRepository implements IClientRepository {
 
     unawaited(run());
     yield* controller.stream;
+  }
+
+  @override
+  FolderWatch watchFiles({required DiscoveredServer server}) {
+    return _WebSocketFolderWatch(
+      url: 'ws://${server.host}:${server.port}/events',
+    );
+  }
+}
+
+/// [FolderWatch] backed by a `dart:io` [WebSocket] to the server's `/events`
+/// endpoint.
+///
+/// Connects lazily on the first [watch] call, sends the watched path, and
+/// emits a [FileEntry] list for every matching `files` message the server
+/// pushes. Filters out messages for other paths so a pending navigation never
+/// shows the wrong folder.
+class _WebSocketFolderWatch implements FolderWatch {
+  final String url;
+  final _controller = StreamController<List<FileEntry>>.broadcast();
+
+  WebSocket? _socket;
+  Future<void>? _connecting;
+  String _path = '';
+  bool _closed = false;
+
+  _WebSocketFolderWatch({required this.url});
+
+  @override
+  Stream<List<FileEntry>> get files => _controller.stream;
+
+  @override
+  void watch(String path) {
+    _path = path;
+    final socket = _socket;
+    if (socket != null && socket.readyState == WebSocket.open) {
+      _send(socket);
+    } else {
+      _connecting ??= _connect();
+    }
+  }
+
+  Future<void> _connect() async {
+    try {
+      final socket = await WebSocket.connect(url);
+      if (_closed) {
+        await socket.close();
+        return;
+      }
+      _socket = socket;
+      socket.listen(
+        _onMessage,
+        onDone: () => _socket = null,
+        onError: (Object e, StackTrace s) {
+          if (!_controller.isClosed) _controller.addError(e, s);
+        },
+        cancelOnError: true,
+      );
+      _send(socket);
+    } catch (e, s) {
+      if (!_controller.isClosed) _controller.addError(e, s);
+    }
+  }
+
+  void _send(WebSocket socket) {
+    socket.add(jsonEncode({'type': 'watch', 'path': _path}));
+  }
+
+  void _onMessage(dynamic message) {
+    try {
+      final decoded = jsonDecode(message as String) as Map<String, dynamic>;
+      if (decoded['type'] != 'files') return;
+      // Ignore listings for a path we are no longer viewing.
+      if ((decoded['path'] as String?) != _path) return;
+      final files = (decoded['files'] as List<dynamic>)
+          .map((e) => FileEntry.fromJson(e as Map<String, dynamic>))
+          .toList();
+      if (!_controller.isClosed) _controller.add(files);
+    } catch (_) {
+      // Ignore malformed server messages.
+    }
+  }
+
+  @override
+  Future<void> close() async {
+    _closed = true;
+    await _socket?.close();
+    _socket = null;
+    await _controller.close();
   }
 }

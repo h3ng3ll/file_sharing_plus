@@ -1,6 +1,7 @@
 import '../../../../core/models/file_entry/file_entry.dart';
 import '../../../../core/services/discovery_service.dart';
 import '../models/transfer_progress.dart';
+import 'folder_watch.dart';
 
 /// Hides the HTTP client and networking details from the presentation layer.
 ///
@@ -29,4 +30,8 @@ abstract interface class IClientRepository {
     required DiscoveredServer server,
     required String filePath,
   });
+
+  /// Opens a live [FolderWatch] for [server] that streams folder listings and
+  /// re-pushes them whenever the server's shared folder changes.
+  FolderWatch watchFiles({required DiscoveredServer server});
 }

@@ -55,12 +55,13 @@ extension BrowserEventPatterns on BrowserEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Init value)?  init,TResult Function( _LoadFiles value)?  loadFiles,TResult Function( _OpenFolder value)?  openFolder,TResult Function( _GoUp value)?  goUp,TResult Function( _Download value)?  download,TResult Function( _PickAndUpload value)?  pickAndUpload,TResult Function( _TransferFinished value)?  transferFinished,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Init value)?  init,TResult Function( _LoadFiles value)?  loadFiles,TResult Function( _StartWatching value)?  startWatching,TResult Function( _OpenFolder value)?  openFolder,TResult Function( _GoUp value)?  goUp,TResult Function( _Download value)?  download,TResult Function( _PickAndUpload value)?  pickAndUpload,TResult Function( _TransferFinished value)?  transferFinished,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Init() when init != null:
 return init(_that);case _LoadFiles() when loadFiles != null:
-return loadFiles(_that);case _OpenFolder() when openFolder != null:
+return loadFiles(_that);case _StartWatching() when startWatching != null:
+return startWatching(_that);case _OpenFolder() when openFolder != null:
 return openFolder(_that);case _GoUp() when goUp != null:
 return goUp(_that);case _Download() when download != null:
 return download(_that);case _PickAndUpload() when pickAndUpload != null:
@@ -83,12 +84,13 @@ return transferFinished(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Init value)  init,required TResult Function( _LoadFiles value)  loadFiles,required TResult Function( _OpenFolder value)  openFolder,required TResult Function( _GoUp value)  goUp,required TResult Function( _Download value)  download,required TResult Function( _PickAndUpload value)  pickAndUpload,required TResult Function( _TransferFinished value)  transferFinished,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Init value)  init,required TResult Function( _LoadFiles value)  loadFiles,required TResult Function( _StartWatching value)  startWatching,required TResult Function( _OpenFolder value)  openFolder,required TResult Function( _GoUp value)  goUp,required TResult Function( _Download value)  download,required TResult Function( _PickAndUpload value)  pickAndUpload,required TResult Function( _TransferFinished value)  transferFinished,}){
 final _that = this;
 switch (_that) {
 case _Init():
 return init(_that);case _LoadFiles():
-return loadFiles(_that);case _OpenFolder():
+return loadFiles(_that);case _StartWatching():
+return startWatching(_that);case _OpenFolder():
 return openFolder(_that);case _GoUp():
 return goUp(_that);case _Download():
 return download(_that);case _PickAndUpload():
@@ -107,12 +109,13 @@ return transferFinished(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Init value)?  init,TResult? Function( _LoadFiles value)?  loadFiles,TResult? Function( _OpenFolder value)?  openFolder,TResult? Function( _GoUp value)?  goUp,TResult? Function( _Download value)?  download,TResult? Function( _PickAndUpload value)?  pickAndUpload,TResult? Function( _TransferFinished value)?  transferFinished,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Init value)?  init,TResult? Function( _LoadFiles value)?  loadFiles,TResult? Function( _StartWatching value)?  startWatching,TResult? Function( _OpenFolder value)?  openFolder,TResult? Function( _GoUp value)?  goUp,TResult? Function( _Download value)?  download,TResult? Function( _PickAndUpload value)?  pickAndUpload,TResult? Function( _TransferFinished value)?  transferFinished,}){
 final _that = this;
 switch (_that) {
 case _Init() when init != null:
 return init(_that);case _LoadFiles() when loadFiles != null:
-return loadFiles(_that);case _OpenFolder() when openFolder != null:
+return loadFiles(_that);case _StartWatching() when startWatching != null:
+return startWatching(_that);case _OpenFolder() when openFolder != null:
 return openFolder(_that);case _GoUp() when goUp != null:
 return goUp(_that);case _Download() when download != null:
 return download(_that);case _PickAndUpload() when pickAndUpload != null:
@@ -134,11 +137,12 @@ return transferFinished(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( DiscoveredServer server)?  init,TResult Function()?  loadFiles,TResult Function( String name)?  openFolder,TResult Function()?  goUp,TResult Function( String fileName)?  download,TResult Function()?  pickAndUpload,TResult Function( String fileName,  TransferDirection direction,  bool success)?  transferFinished,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( DiscoveredServer server)?  init,TResult Function()?  loadFiles,TResult Function()?  startWatching,TResult Function( String name)?  openFolder,TResult Function()?  goUp,TResult Function( String fileName)?  download,TResult Function()?  pickAndUpload,TResult Function( String fileName,  TransferDirection direction,  bool success)?  transferFinished,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Init() when init != null:
 return init(_that.server);case _LoadFiles() when loadFiles != null:
-return loadFiles();case _OpenFolder() when openFolder != null:
+return loadFiles();case _StartWatching() when startWatching != null:
+return startWatching();case _OpenFolder() when openFolder != null:
 return openFolder(_that.name);case _GoUp() when goUp != null:
 return goUp();case _Download() when download != null:
 return download(_that.fileName);case _PickAndUpload() when pickAndUpload != null:
@@ -161,11 +165,12 @@ return transferFinished(_that.fileName,_that.direction,_that.success);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( DiscoveredServer server)  init,required TResult Function()  loadFiles,required TResult Function( String name)  openFolder,required TResult Function()  goUp,required TResult Function( String fileName)  download,required TResult Function()  pickAndUpload,required TResult Function( String fileName,  TransferDirection direction,  bool success)  transferFinished,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( DiscoveredServer server)  init,required TResult Function()  loadFiles,required TResult Function()  startWatching,required TResult Function( String name)  openFolder,required TResult Function()  goUp,required TResult Function( String fileName)  download,required TResult Function()  pickAndUpload,required TResult Function( String fileName,  TransferDirection direction,  bool success)  transferFinished,}) {final _that = this;
 switch (_that) {
 case _Init():
 return init(_that.server);case _LoadFiles():
-return loadFiles();case _OpenFolder():
+return loadFiles();case _StartWatching():
+return startWatching();case _OpenFolder():
 return openFolder(_that.name);case _GoUp():
 return goUp();case _Download():
 return download(_that.fileName);case _PickAndUpload():
@@ -184,11 +189,12 @@ return transferFinished(_that.fileName,_that.direction,_that.success);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( DiscoveredServer server)?  init,TResult? Function()?  loadFiles,TResult? Function( String name)?  openFolder,TResult? Function()?  goUp,TResult? Function( String fileName)?  download,TResult? Function()?  pickAndUpload,TResult? Function( String fileName,  TransferDirection direction,  bool success)?  transferFinished,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( DiscoveredServer server)?  init,TResult? Function()?  loadFiles,TResult? Function()?  startWatching,TResult? Function( String name)?  openFolder,TResult? Function()?  goUp,TResult? Function( String fileName)?  download,TResult? Function()?  pickAndUpload,TResult? Function( String fileName,  TransferDirection direction,  bool success)?  transferFinished,}) {final _that = this;
 switch (_that) {
 case _Init() when init != null:
 return init(_that.server);case _LoadFiles() when loadFiles != null:
-return loadFiles();case _OpenFolder() when openFolder != null:
+return loadFiles();case _StartWatching() when startWatching != null:
+return startWatching();case _OpenFolder() when openFolder != null:
 return openFolder(_that.name);case _GoUp() when goUp != null:
 return goUp();case _Download() when download != null:
 return download(_that.fileName);case _PickAndUpload() when pickAndUpload != null:
@@ -291,6 +297,38 @@ int get hashCode => runtimeType.hashCode;
 @override
 String toString() {
   return 'BrowserEvent.loadFiles()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class _StartWatching implements BrowserEvent {
+  const _StartWatching();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _StartWatching);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'BrowserEvent.startWatching()';
 }
 
 
