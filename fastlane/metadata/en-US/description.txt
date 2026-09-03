@@ -1,0 +1,28 @@
+Transfer files directly between your Mac and iPhone over the same local
+Wi-Fi network.
+
+Local Wi-Fi File Transfer turns your Mac into a simple file server and
+your iPhone into a convenient file browser. No cloud storage or Internet
+connection is required.
+
+With the app you can:
+• Automatically discover available Macs on the local network using Bonjour.
+• Connect to a Mac with one tap.
+• Browse shared folders and view files.
+• Download files from Mac to iPhone with transfer progress.
+• Upload files from the iPhone Files app to the Mac.
+• Share a selected folder from your Mac.
+• Monitor active transfers and connected devices.
+
+Files are transferred directly over your local network using standard
+HTTP streaming. Large files can be transferred without loading the
+entire file into memory.
+
+The app is designed as a lightweight local transfer tool: no accounts,
+cloud storage, database, background synchronization, or FTP server are
+required.
+
+Use it at home, in the office, or anywhere your Mac and iPhone are
+connected to the same Wi-Fi network.
+
+

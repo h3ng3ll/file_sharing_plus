@@ -1,0 +1,166 @@
+platform :ios do
+  desc "Upload metadata"
+  lane :upload_metadata do
+    # --- Sanity-check env before anything else ---
+    %w[APPSTORE_KEY_ID APPSTORE_ISSUER_ID APPSTORE_P8 IOS_BUNDLE_ID].each do |k|
+      v = ENV[k]
+      if v.nil? || v.strip.empty?
+        UI.user_error!("Required env var '#{k}' is missing or empty.")
+      end
+    end
+    UI.message("Bundle id: #{ENV['IOS_BUNDLE_ID']}")
+    UI.message("Key id: #{ENV['APPSTORE_KEY_ID']}")
+    UI.message("Issuer id: #{ENV['APPSTORE_ISSUER_ID']}")
+
+    app_store_connect_api_key(
+      key_id: ENV["APPSTORE_KEY_ID"],
+      issuer_id: ENV["APPSTORE_ISSUER_ID"],
+      key_content: ENV["APPSTORE_P8"]
+    )
+
+    UI.message("Current directory: #{Dir.pwd}")
+
+    possible_metadata_paths = [
+      "metadata", "./metadata", "../metadata",
+      "./fastlane/metadata", "../fastlane/metadata"
+    ]
+    metadata_path = nil
+    possible_metadata_paths.each do |path|
+      if Dir.exist?(path)
+        metadata_path = path
+        UI.success("Found metadata path: #{path}")
+        break
+      end
+    end
+    UI.user_error!("Cannot find metadata path.") if metadata_path.nil?
+
+    review_info_path = File.join(metadata_path, "review_information")
+    if Dir.exist?(review_info_path)
+      %w[first_name.txt last_name.txt email_address.txt phone_number.txt].each do |file|
+        file_path = File.join(review_info_path, file)
+        if File.exist?(file_path) && File.zero?(file_path)
+          File.write(file_path, "N/A")
+          UI.message("Fixed empty file: #{file}")
+        end
+      end
+    end
+
+    # --- КРОК 1: завантажуємо тільки метадані ---
+    deliver(
+      app_identifier: ENV["IOS_BUNDLE_ID"],
+      submit_for_review: false,
+      force: true,
+      languages: ["en-US"],   # only English
+      metadata_path: "fastlane/metadata",
+      skip_app_version_update: true,
+      skip_binary_upload: true,
+      skip_screenshots: true,  # скріншоти пропускаємо тут
+      automatic_release: false,
+      precheck_include_in_app_purchases: false,
+      verbose: true,
+      submission_information: {
+        export_compliance_available_on_french_store: false,
+        export_compliance_contains_proprietary_cryptography: false,
+        export_compliance_contains_third_party_cryptography: false,
+        export_compliance_is_exempt: false,
+        export_compliance_uses_encryption: false,
+        export_compliance_app_type: nil,
+        export_compliance_encryption_updated: false,
+        export_compliance_compliance_required: false,
+        export_compliance_platform: "ios",
+        content_rights_contains_third_party_content: false,
+        content_rights_has_rights: false,
+        add_id_info_limits_tracking: false,
+        add_id_info_serves_ads: false,
+        add_id_info_tracks_action: false,
+        add_id_info_tracks_install: false,
+        add_id_info_uses_idfa: true
+      },
+      app_review_information: {
+        first_name: "Oleksandr",
+        last_name: "Naumenko",
+        phone_number: "+380978238820",
+        email_address: "alexandr132135@gmail.com"
+      },
+      reject_if_possible: false,
+      run_precheck_before_submit: false,
+      precheck_default_rule_level: ":warn"
+    )
+
+  # --- КРОК 2: завантажуємо скріншоти через Spaceship строго по порядку ---
+  UI.message("Starting sequential screenshot upload via Spaceship...")
+
+  require 'spaceship'
+
+  p8_path = "/tmp/asc_key.p8"
+  File.write(p8_path, ENV["APPSTORE_P8"])
+
+  Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.create(
+    key_id: ENV["APPSTORE_KEY_ID"],
+    issuer_id: ENV["APPSTORE_ISSUER_ID"],
+    filepath: p8_path
+  )
+
+  app = Spaceship::ConnectAPI::App.find(ENV["IOS_BUNDLE_ID"])
+  version = app.get_edit_app_store_version(platform: Spaceship::ConnectAPI::Platform::IOS)
+
+  screenshots_dir = File.expand_path("screenshots", Dir.pwd)
+  lang = "en-US"
+
+  UI.message("🚀 Processing language: #{lang.upcase}")
+
+  lang_dir = "#{screenshots_dir}/#{lang}"
+
+  unless File.directory?(lang_dir)
+    UI.error("Directory not found: #{lang_dir}")
+    return
+  end
+
+  files = Dir.entries(lang_dir)
+             .select { |f| f.downcase.end_with?('.png') }
+             .sort
+
+  if files.empty?
+    UI.error("No PNG files found for #{lang}, skipping.")
+    return
+  end
+
+  # Отримуємо localization
+  localization = version.get_app_store_version_localizations.find { |l| l.locale == lang }
+  if localization.nil?
+    UI.error("No localization found for #{lang}, skipping.")
+    return
+  end
+
+  # Отримуємо screenshot sets
+  screenshot_sets = localization.get_app_screenshot_sets
+
+  # Видаляємо старі скріншоти
+  screenshot_sets.each do |set|
+    (set.app_screenshots || []).each do |screenshot|
+      screenshot.delete!
+      UI.message("  Deleted old screenshot in #{lang}")
+    end
+  end
+
+  # Знаходимо або створюємо потрібний set
+  target_set = screenshot_sets.find { |s| s.screenshot_display_type == "APP_IPHONE_65" }
+  if target_set.nil?
+    UI.message("  Creating APP_IPHONE_65 set for #{lang}...")
+    target_set = localization.create_app_screenshot_set(
+      attributes: { "screenshotDisplayType" => "APP_IPHONE_65" }
+    )
+  end
+
+  # Завантажуємо файли строго по порядку
+  files.each_with_index do |file, index|
+    file_path = "#{lang_dir}/#{file}"
+    UI.message("  Uploading #{file} (#{index + 1}/#{files.count})...")
+    target_set.upload_screenshot(path: file_path, wait_for_processing: true)
+    UI.success("  ✅ Uploaded #{file}")
+  end
+
+  UI.success("✅ Finished language: #{lang}")
+  UI.success("🎉 UPLOAD COMPLETED SUCCESSFULLY!")
+  end
+end
