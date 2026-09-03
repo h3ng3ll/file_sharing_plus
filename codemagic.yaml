@@ -26,8 +26,8 @@ workflows:
             echo "ERROR: Metadata directory not found at ./fastlane/metadata"
             exit 1
           fi
-          if [ ! -d "./fastlane/metadata/en-GB" ]; then
-            echo "ERROR: No en-GB metadata folder found in ./fastlane/metadata"
+          if [ ! -d "./fastlane/metadata/en-US" ]; then
+            echo "ERROR: No en-US metadata folder found in ./fastlane/metadata"
             exit 1
           fi
           echo "Scanning metadata locales..."
@@ -50,8 +50,8 @@ workflows:
           done
           REQUIRED_FILES=("name.txt" "description.txt" "keywords.txt" "privacy_url.txt" "support_url.txt")
           for FILE in "${REQUIRED_FILES[@]}"; do
-            if [ ! -f "./fastlane/metadata/en-GB/$FILE" ]; then
-              echo "ERROR: Required metadata file ./fastlane/metadata/en-GB/$FILE is missing"
+            if [ ! -f "./fastlane/metadata/en-US/$FILE" ]; then
+              echo "ERROR: Required metadata file ./fastlane/metadata/en-US/$FILE is missing"
               exit 1
             fi
           done
