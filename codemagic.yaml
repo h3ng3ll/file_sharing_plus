@@ -178,15 +178,13 @@ workflows:
       - name: Install pods
         script: |
           find . -name "Podfile" -execdir pod install \;
-      - name: Flutter build ipa
+      - name: Flutter build MacOS
         script: |
           flutter build macos --release
     artifacts:
-      - build/ios/ipa/*.ipa
+      - build/macos/Build/Products/Release/*.app
+      - build/macos/Build/Products/Release/*.dSYM
       - /tmp/xcodebuild_logs/*.log
-      - flutter_drive.log
-      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app
-      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
     publishing:
       app_store_connect:
         api_key: $APPSTORE_P8
