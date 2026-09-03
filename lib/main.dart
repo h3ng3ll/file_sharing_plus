@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -22,18 +23,35 @@ Future<void> main() async {
     await windowManager.ensureInitialized();
     // Fits one column (Server card + single-column Shared Files) at its minimum
     // width; the layout collapses to a single stacked column at this size.
-    await windowManager.setMinimumSize(const Size(420.0, 600.0));
+    await windowManager.setMinimumSize(
+      const Size(
+        420.0,
+        600.0,
+      ),
+    );
   }
 
   await initHive();
   await initDependencies();
+  final packageInfo = await PackageInfo.fromPlatform();
+  final name = packageInfo.appName;
   Bloc.observer = const AppObserver();
-  runApp(const MyApp());
+
+  runApp(
+    MyApp(
+      appName: name,
+    ),
+  );
 }
 
 /// Root application widget.
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  final String appName;
+
+  const MyApp({
+    super.key,
+    required this.appName,
+  });
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -45,7 +63,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'File Sharing',
+      title: widget.appName,
       theme: AppThemeData.light,
       debugShowCheckedModeBanner: false,
       scaffoldMessengerKey: UiMessageService.messengerKey,
@@ -53,10 +71,26 @@ class _MyAppState extends State<MyApp> {
       builder: (context, child) => ResponsiveBreakpoints.builder(
         child: child!,
         breakpoints: const [
-          Breakpoint(start: 0, end: 450, name: MOBILE),
-          Breakpoint(start: 451, end: 900, name: TABLET),
-          Breakpoint(start: 900, end: 1920, name: DESKTOP),
-          Breakpoint(start: 1921, end: double.infinity, name: '4K'),
+          Breakpoint(
+            start: 0,
+            end: 450,
+            name: MOBILE,
+          ),
+          Breakpoint(
+            start: 451,
+            end: 900,
+            name: TABLET,
+          ),
+          Breakpoint(
+            start: 900,
+            end: 1920,
+            name: DESKTOP,
+          ),
+          Breakpoint(
+            start: 1921,
+            end: double.infinity,
+            name: '4K',
+          ),
         ],
       ),
     );
