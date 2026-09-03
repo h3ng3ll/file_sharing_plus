@@ -72,5 +72,14 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSLocalNetworkUsageDescription</key>
+    <string>This app discovers and connects to nearby Macs on your local Wi-Fi network to transfer files.</string>
+
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>File Sharing Plus uses your photo library to select photos for transfer to your Mac.</string>
+
+    <key>NSCameraUsageDescription</key>
+    <string>File Sharing Plus uses the camera to capture photos for transfer to your Mac.</string>
+
 </dict>
 </plist>
