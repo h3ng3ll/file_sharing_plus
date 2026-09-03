@@ -86,7 +86,7 @@ workflows:
       vars:
         BUNDLE_ID: "$IOS_BUNDLE_ID"
         APP_STORE_APPLE_ID: $APPSTORE_APP_ID
-      flutter:  3.12.2
+      flutter: 3.44.4
       xcode: latest
       cocoapods: default
     scripts:
