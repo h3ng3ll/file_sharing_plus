@@ -8,7 +8,7 @@ workflows:
       groups:
         - store_credentials
       vars:
-        IOS_BUNDLE_ID: com.hengell.file-sharing-plus.ios
+        IOS_BUNDLE_ID: com.hengell.file-sharing-plus
         APP_NAME: $APPSTORE_APP_NAME
     scripts:
       - name: Print working dir & contents
