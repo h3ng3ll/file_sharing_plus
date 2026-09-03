@@ -1,4 +1,80 @@
 workflows:
+  upload_macos_metadata:
+    name: Upload macOS metadata
+    instance_type: mac_mini_m2
+    max_build_duration: 45
+    environment:
+      xcode: 16.2
+      groups:
+        - store_credentials
+      vars:
+        # The Mac app is a separate App Store record from the iOS one.
+        MACOS_BUNDLE_ID: com.hengell.file-sharing-plus.macos
+        APP_NAME: $APPSTORE_APP_NAME
+    scripts:
+      - name: Print working dir & contents
+        script: |
+          echo "PWD: $(pwd)"
+          ls -R
+      - name: Install Ruby dependencies
+        script: |
+          bundle install || bundle install --path vendor/bundle
+          gem install fastlane-plugin-appicon || true
+      - name: Validate macOS metadata directory structure
+        script: |
+          echo "===== Validating macOS Metadata ====="
+          if [ ! -d "./fastlane/metadata_macos" ]; then
+            echo "ERROR: Metadata directory not found at ./fastlane/metadata_macos"
+            exit 1
+          fi
+          if [ ! -d "./fastlane/metadata_macos/en-US" ]; then
+            echo "ERROR: No en-US metadata folder found in ./fastlane/metadata_macos"
+            exit 1
+          fi
+          REQUIRED_FILES=("name.txt" "description.txt" "keywords.txt" "privacy_url.txt" "support_url.txt")
+          for FILE in "${REQUIRED_FILES[@]}"; do
+            if [ ! -f "./fastlane/metadata_macos/en-US/$FILE" ]; then
+              echo "ERROR: Required metadata file ./fastlane/metadata_macos/en-US/$FILE is missing"
+              exit 1
+            fi
+          done
+          echo "macOS metadata validation successful!"
+      - name: Validate macOS screenshot dimensions
+        script: |
+          # App Store Connect accepts only these four sizes for a Mac
+          # screenshot. Failing here beats an IMAGE_INCORRECT_DIMENSIONS
+          # rejection after the upload has already run.
+          echo "===== Validating macOS Screenshots ====="
+          DIR="./fastlane/screenshots_macos/en-US"
+          if [ ! -d "$DIR" ]; then
+            echo "ERROR: $DIR not found"
+            exit 1
+          fi
+          COUNT=0
+          for F in "$DIR"/*.png; do
+            [ -f "$F" ] || continue
+            W=$(sips -g pixelWidth "$F" | awk '/pixelWidth/{print $2}')
+            H=$(sips -g pixelHeight "$F" | awk '/pixelHeight/{print $2}')
+            case "${W}x${H}" in
+              1280x800|1440x900|2560x1600|2880x1800)
+                echo "  OK   $(basename "$F") ${W}x${H}" ;;
+              *)
+                echo "  FAIL $(basename "$F") ${W}x${H} — must be 1280x800, 1440x900, 2560x1600 or 2880x1800"
+                exit 1 ;;
+            esac
+            COUNT=$((COUNT+1))
+          done
+          if [ "$COUNT" -eq 0 ]; then
+            echo "ERROR: no PNG screenshots found in $DIR"
+            exit 1
+          fi
+          echo "All $COUNT macOS screenshots have valid dimensions"
+      - name: Upload macOS metadata via fastlane deliver
+        script: |
+          bundle exec fastlane mac upload_metadata_macos
+    artifacts:
+      - fastlane/logs/**/*
+
   upload_ios_metadata:
     name: Upload iOS metadata
     instance_type: mac_mini_m2

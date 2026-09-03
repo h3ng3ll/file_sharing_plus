@@ -81,5 +81,8 @@
     <key>NSCameraUsageDescription</key>
     <string>File Sharing Plus uses the camera to capture photos for transfer to your Mac.</string>
 
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>File Sharing Plus uses your local network to discover nearby devices for file sharing. Your location is not collected or stored.</string>
+
 </dict>
 </plist>

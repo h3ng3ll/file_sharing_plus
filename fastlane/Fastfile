@@ -164,3 +164,202 @@ platform :ios do
   UI.success("🎉 UPLOAD COMPLETED SUCCESSFULLY!")
   end
 end
+
+platform :mac do
+  desc "Upload macOS metadata and screenshots"
+  lane :upload_metadata_macos do
+    # --- Sanity-check env before anything else ---
+    # MACOS_BUNDLE_ID is separate from IOS_BUNDLE_ID: the Mac app is a distinct
+    # App Store record (com.hengell.file-sharing-plus.macos), so uploading with
+    # the iOS id would write the wrong app's listing.
+    %w[APPSTORE_KEY_ID APPSTORE_ISSUER_ID APPSTORE_P8 MACOS_BUNDLE_ID].each do |k|
+      v = ENV[k]
+      if v.nil? || v.strip.empty?
+        UI.user_error!("Required env var '#{k}' is missing or empty.")
+      end
+    end
+    UI.message("Bundle id: #{ENV['MACOS_BUNDLE_ID']}")
+    UI.message("Key id: #{ENV['APPSTORE_KEY_ID']}")
+    UI.message("Issuer id: #{ENV['APPSTORE_ISSUER_ID']}")
+
+    app_store_connect_api_key(
+      key_id: ENV["APPSTORE_KEY_ID"],
+      issuer_id: ENV["APPSTORE_ISSUER_ID"],
+      key_content: ENV["APPSTORE_P8"]
+    )
+
+    UI.message("Current directory: #{Dir.pwd}")
+
+    possible_metadata_paths = [
+      "metadata_macos", "./metadata_macos", "../metadata_macos",
+      "./fastlane/metadata_macos", "../fastlane/metadata_macos"
+    ]
+    metadata_path = nil
+    possible_metadata_paths.each do |path|
+      if Dir.exist?(path)
+        metadata_path = path
+        UI.success("Found metadata path: #{path}")
+        break
+      end
+    end
+    UI.user_error!("Cannot find metadata_macos path.") if metadata_path.nil?
+
+    review_info_path = File.join(metadata_path, "review_information")
+    if Dir.exist?(review_info_path)
+      %w[first_name.txt last_name.txt email_address.txt phone_number.txt].each do |file|
+        file_path = File.join(review_info_path, file)
+        if File.exist?(file_path) && File.zero?(file_path)
+          File.write(file_path, "N/A")
+          UI.message("Fixed empty file: #{file}")
+        end
+      end
+    end
+
+    # --- STEP 1: metadata only ---
+    # platform: "osx" is what routes deliver at the Mac version of the record.
+    deliver(
+      app_identifier: ENV["MACOS_BUNDLE_ID"],
+      platform: "osx",
+      submit_for_review: false,
+      force: true,
+      languages: ["en-US"],   # only English
+      metadata_path: metadata_path,
+      skip_app_version_update: true,
+      skip_binary_upload: true,
+      skip_screenshots: true,  # screenshots go up via Spaceship below
+      automatic_release: false,
+      precheck_include_in_app_purchases: false,
+      verbose: true,
+      submission_information: {
+        export_compliance_available_on_french_store: false,
+        export_compliance_contains_proprietary_cryptography: false,
+        export_compliance_contains_third_party_cryptography: false,
+        export_compliance_is_exempt: false,
+        export_compliance_uses_encryption: false,
+        export_compliance_app_type: nil,
+        export_compliance_encryption_updated: false,
+        export_compliance_compliance_required: false,
+        export_compliance_platform: "osx",
+        content_rights_contains_third_party_content: false,
+        content_rights_has_rights: false,
+        add_id_info_limits_tracking: false,
+        add_id_info_serves_ads: false,
+        add_id_info_tracks_action: false,
+        add_id_info_tracks_install: false,
+        add_id_info_uses_idfa: true
+      },
+      app_review_information: {
+        first_name: "Oleksandr",
+        last_name: "Naumenko",
+        phone_number: "+380978238820",
+        email_address: "alexandr132135@gmail.com"
+      },
+      reject_if_possible: false,
+      run_precheck_before_submit: false,
+      precheck_default_rule_level: ":warn"
+    )
+
+    # --- STEP 2: screenshots, in order, via Spaceship ---
+    UI.message("Starting sequential screenshot upload via Spaceship...")
+
+    require 'spaceship'
+    require 'shellwords'
+
+    p8_path = "/tmp/asc_key_macos.p8"
+    File.write(p8_path, ENV["APPSTORE_P8"])
+
+    Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.create(
+      key_id: ENV["APPSTORE_KEY_ID"],
+      issuer_id: ENV["APPSTORE_ISSUER_ID"],
+      filepath: p8_path
+    )
+
+    app = Spaceship::ConnectAPI::App.find(ENV["MACOS_BUNDLE_ID"])
+    UI.user_error!("App not found: #{ENV['MACOS_BUNDLE_ID']}") if app.nil?
+
+    version = app.get_edit_app_store_version(
+      platform: Spaceship::ConnectAPI::Platform::MAC_OS
+    )
+    if version.nil?
+      UI.user_error!(
+        "No editable macOS version for #{ENV['MACOS_BUNDLE_ID']}. " \
+        "Create a version in App Store Connect first."
+      )
+    end
+
+    screenshots_dir = File.expand_path("screenshots_macos", Dir.pwd)
+    lang = "en-US"
+
+    UI.message("🚀 Processing language: #{lang.upcase}")
+
+    lang_dir = "#{screenshots_dir}/#{lang}"
+
+    unless File.directory?(lang_dir)
+      UI.error("Directory not found: #{lang_dir}")
+      next
+    end
+
+    files = Dir.entries(lang_dir)
+               .select { |f| f.downcase.end_with?('.png') }
+               .sort
+
+    if files.empty?
+      UI.error("No PNG files found for #{lang}, skipping.")
+      next
+    end
+
+    # App Store Connect accepts only these four sizes for a Mac screenshot, and
+    # rejects the whole upload on any other. Checking here turns a late
+    # IMAGE_INCORRECT_DIMENSIONS rejection into an immediate, local failure.
+    allowed = [[1280, 800], [1440, 900], [2560, 1600], [2880, 1800]]
+    files.each do |file|
+      path = "#{lang_dir}/#{file}"
+      out = `sips -g pixelWidth -g pixelHeight #{path.shellescape} 2>/dev/null`
+      w = out[/pixelWidth: (\d+)/, 1].to_i
+      h = out[/pixelHeight: (\d+)/, 1].to_i
+      unless allowed.include?([w, h])
+        UI.user_error!(
+          "#{file} is #{w}x#{h}. macOS screenshots must be one of: " \
+          "#{allowed.map { |a| a.join('x') }.join(', ')}."
+        )
+      end
+    end
+    UI.success("  All #{files.count} screenshots have valid macOS dimensions")
+
+    localization = version.get_app_store_version_localizations
+                          .find { |l| l.locale == lang }
+    if localization.nil?
+      UI.error("No localization found for #{lang}, skipping.")
+      next
+    end
+
+    screenshot_sets = localization.get_app_screenshot_sets
+
+    # Remove the previous screenshots so the set does not accumulate stale ones.
+    screenshot_sets.each do |set|
+      (set.app_screenshots || []).each do |screenshot|
+        screenshot.delete!
+        UI.message("  Deleted old screenshot in #{lang}")
+      end
+    end
+
+    # APP_DESKTOP is the Mac display type, the counterpart of APP_IPHONE_65.
+    target_set = screenshot_sets.find { |s| s.screenshot_display_type == "APP_DESKTOP" }
+    if target_set.nil?
+      UI.message("  Creating APP_DESKTOP set for #{lang}...")
+      target_set = localization.create_app_screenshot_set(
+        attributes: { "screenshotDisplayType" => "APP_DESKTOP" }
+      )
+    end
+
+    files.each_with_index do |file, index|
+      file_path = "#{lang_dir}/#{file}"
+      UI.message("  Uploading #{file} (#{index + 1}/#{files.count})...")
+      target_set.upload_screenshot(path: file_path, wait_for_processing: true)
+      UI.success("  ✅ Uploaded #{file}")
+    end
+
+    UI.success("✅ Finished language: #{lang}")
+    UI.success("🎉 macOS UPLOAD COMPLETED SUCCESSFULLY!")
+  end
+end

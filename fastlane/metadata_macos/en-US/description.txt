@@ -1,0 +1,27 @@
+Share a folder from your Mac and transfer files to and from your iPhone
+over the same local Wi-Fi network.
+
+On the Mac, File Sharing Plus runs a lightweight local file server: you
+pick a folder to share, start the server, and your iPhone can browse it
+and exchange files. No cloud storage or Internet connection is required.
+
+On your Mac you can:
+• Choose any folder to share and change it at any time.
+• Start and stop the local server, and set the sharing port.
+• See every connected device and how many requests it has made.
+• Watch a live activity log of connections, downloads, uploads and deletes.
+• See the shared folder's contents update automatically as files change.
+• Have the last shared folder restored the next time you launch the app.
+
+Your Mac is announced on the local network with Bonjour, so the iPhone app
+finds it automatically — no addresses to type. If discovery is unavailable,
+the iPhone can still connect using the Mac's IP address and port shown in
+the app.
+
+Files are transferred directly over your local network using standard HTTP
+streaming, so large files transfer without loading the entire file into
+memory. Nothing leaves your network: there are no accounts, no cloud
+storage, no database, no background synchronization and no FTP server.
+
+Use it at home, in the office, or anywhere your Mac and iPhone are
+connected to the same Wi-Fi network.
