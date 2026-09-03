@@ -12,8 +12,8 @@
 	<true/>
 	<key>provisioningProfiles</key>
 	<dict>
-		<key>com.hengell.file-sharing-plus.ios</key>
-		<string>file_sharing_plus_ios</string>
+		<key>com.hengell.file-sharing-plus</key>
+		<string>file_sharing_plus</string>
 	</dict>
 </dict>
 </plist>
