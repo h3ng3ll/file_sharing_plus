@@ -73,6 +73,11 @@ class HttpServerRepository implements IServerRepository {
     }
     _sockets.clear();
 
+    // Devices are per-session: drop them and publish the cleared list so a
+    // restart never resurrects the previous session's clients.
+    _devices.clear();
+    _devicesController.add(const <ConnectedDevice>[]);
+
     final server = _server;
     if (server != null) {
       await server.close(force: true);
@@ -82,7 +87,6 @@ class HttpServerRepository implements IServerRepository {
   }
 
   Future<void> _handleRequest(HttpRequest request) async {
-    _trackDevice(request);
     try {
       final path = request.uri.path;
       if (request.method == 'GET' && path == '/events') {
@@ -113,6 +117,7 @@ class HttpServerRepository implements IServerRepository {
   }
 
   Future<void> _handlePing(HttpRequest request) async {
+    _trackDevice(request);
     _writeJson(request.response, {
       'status': 'ok',
       'name': Platform.localHostname,
@@ -121,6 +126,7 @@ class HttpServerRepository implements IServerRepository {
   }
 
   Future<void> _handleListFiles(HttpRequest request) async {
+    _trackDevice(request);
     final relative = request.uri.queryParameters['path'] ?? '';
     final entries = await _scanFolder(relative);
     if (entries == null) {
@@ -179,6 +185,7 @@ class HttpServerRepository implements IServerRepository {
   }
 
   Future<void> _handleDownload(HttpRequest request) async {
+    _trackDevice(request);
     final root = _sharedFolder;
     if (root == null) {
       request.response.statusCode = HttpStatus.notFound;
@@ -212,6 +219,7 @@ class HttpServerRepository implements IServerRepository {
   }
 
   Future<void> _handleUpload(HttpRequest request) async {
+    _trackDevice(request);
     final root = _sharedFolder;
     if (root == null) {
       request.response.statusCode = HttpStatus.serviceUnavailable;
@@ -248,6 +256,7 @@ class HttpServerRepository implements IServerRepository {
   }
 
   Future<void> _handleDelete(HttpRequest request) async {
+    _trackDevice(request);
     final root = _sharedFolder;
     if (root == null) {
       request.response.statusCode = HttpStatus.serviceUnavailable;
@@ -288,7 +297,10 @@ class HttpServerRepository implements IServerRepository {
   /// client. The client sends `{"type":"watch","path":"<relative>"}`; the
   /// server replies with the listing for that path and re-pushes it on change.
   Future<void> _handleEvents(HttpRequest request) async {
+    // Only a completed upgrade is a real connection: a browser opening this
+    // path with a plain GET throws above this line and must not be tracked.
     final socket = await WebSocketTransformer.upgrade(request);
+    _trackDevice(request);
     _sockets[socket] = '';
     _log(ActivityType.connection, 'Event stream opened');
 

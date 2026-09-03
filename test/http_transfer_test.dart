@@ -5,6 +5,7 @@ import 'package:file_sharing/core/models/file_entry/file_entry.dart';
 import 'package:file_sharing/core/services/discovery_service.dart';
 import 'package:file_sharing/features/client/data/repositories/http_client_repository.dart';
 import 'package:file_sharing/features/server/data/repositories/http_server_repository.dart';
+import 'package:file_sharing/features/server/domain/models/connected_device.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
@@ -201,6 +202,63 @@ void main() {
       await watch.close();
       otherDir.deleteSync(recursive: true);
     });
+  });
+
+  test('a failed browser request registers no connected device', () {
+    return _withRealHttp(() async {
+      final browser = HttpClient();
+      final base = 'http://${device.host}:${device.port}';
+
+      // A browser hitting an unknown path, repeatedly: every attempt fails, so
+      // none may appear as a device or bump a request count.
+      for (var attempt = 0; attempt < 3; attempt++) {
+        for (final path in ['/', '/favicon.ico']) {
+          final response = await (await browser.getUrl(
+            Uri.parse('$base$path'),
+          )).close();
+          await response.drain<void>();
+          expect(response.statusCode, HttpStatus.notFound);
+        }
+      }
+
+      // A plain GET on /events cannot complete the WebSocket handshake:
+      // upgrade() rejects the missing headers with 400 before connecting.
+      final upgrade = await (await browser.getUrl(
+        Uri.parse('$base/events'),
+      )).close();
+      await upgrade.drain<void>();
+      expect(upgrade.statusCode, HttpStatus.badRequest);
+      browser.close();
+
+      // Collect the LAST emission rather than the first: all of these requests
+      // share the loopback address, so a tracked failure shows up as an
+      // inflated requestCount on the single entry, not as an extra device.
+      final emissions = <List<ConnectedDevice>>[];
+      final sub = server.connectedDevices.listen(emissions.add);
+      addTearDown(sub.cancel);
+
+      // One real API call: the only request that legitimately counts.
+      expect(await client.ping(host: device.host, port: device.port), isTrue);
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+
+      expect(emissions, isNotEmpty);
+      final devices = emissions.last;
+      expect(devices.single.address, device.host);
+      // 7 failed attempts preceded this; only the ping may be counted.
+      expect(devices.single.requestCount, 1);
+    });
+  });
+
+  test('stop clears the connected-device list', () async {
+    await _withRealHttp(() async {
+      expect(await client.ping(host: device.host, port: device.port), isTrue);
+    });
+
+    // Subscribe before stopping: the controller is broadcast, so an emission
+    // with no listener is dropped.
+    final cleared = server.connectedDevices.first;
+    await server.stop();
+    expect(await cleared.timeout(const Duration(seconds: 5)), isEmpty);
   });
 }
 
