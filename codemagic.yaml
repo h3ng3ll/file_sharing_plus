@@ -219,9 +219,9 @@ workflows:
     environment:
       groups:
         - store_credentials
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: $IOS_BUNDLE_ID
+#      ios_signing:
+#        distribution_type: app_store
+#        bundle_identifier: $IOS_BUNDLE_ID
       vars:
         BUNDLE_ID: "$IOS_BUNDLE_ID"
         APP_STORE_APPLE_ID: $APPSTORE_APP_ID
@@ -231,20 +231,19 @@ workflows:
     scripts:
       - name: Detach Xcode project from any developer account
         script: |
-          # Remove account-specific signing keys so Codemagic resolves the
-          # team itself via the App Store Connect API key + Apple Developer
-          # account (use-profiles below). Done on CI only — local dev keeps
-          # its own signing. macOS BSD sed.
-          PBXPROJ="ios/Runner.xcodeproj/project.pbxproj"
+          PBXPROJ="macos/Runner.xcodeproj/project.pbxproj"
+          
           for KEY in DEVELOPMENT_TEAM CODE_SIGN_IDENTITY PROVISIONING_PROFILE PROVISIONING_PROFILE_SPECIFIER; do
             COUNT=$(grep -Ec "^[[:space:]]*$KEY = [^;]*;" "$PBXPROJ" 2>/dev/null || true)
             sed -i '' -E "/^[[:space:]]*$KEY = [^;]*;[[:space:]]*$/d" "$PBXPROJ"
-            echo "  Removed $KEY (${COUNT:-0} occurrence(s))"
+            echo "Removed $KEY (${COUNT:-0} occurrence(s))"
           done
+          
           sed -i '' -E 's/CODE_SIGN_STYLE = [^;]*;/CODE_SIGN_STYLE = Automatic;/g' "$PBXPROJ"
-          echo "  Forced CODE_SIGN_STYLE = Automatic"
+
       - name: Set up provisioning profiles settings on Xcode project
-        script: xcode-project use-profiles --verbose
+        script: |
+            xcode-project use-profiles --verbose
       - name: Clean Flutter project
         script: |
           flutter clean
