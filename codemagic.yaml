@@ -219,9 +219,9 @@ workflows:
     environment:
       groups:
         - store_credentials
-#      ios_signing:
-#        distribution_type: app_store
-#        bundle_identifier: $IOS_BUNDLE_ID
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: $IOS_BUNDLE_ID
       vars:
         BUNDLE_ID: "$IOS_BUNDLE_ID"
         APP_STORE_APPLE_ID: $APPSTORE_APP_ID
