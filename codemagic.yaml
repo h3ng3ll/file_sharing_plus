@@ -9,7 +9,7 @@ workflows:
         - store_credentials
       vars:
         # The Mac app is a separate App Store record from the iOS one.
-        MACOS_BUNDLE_ID: com.hengell.file-sharing-plus.macos
+        MACOS_BUNDLE_ID: com.hengell.file-sharing-plus
         APP_NAME: $APPSTORE_APP_NAME
     scripts:
       - name: Print working dir & contents
