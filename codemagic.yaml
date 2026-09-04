@@ -215,7 +215,7 @@ workflows:
     max_build_duration: 120
     instance_type: mac_mini_m2
     integrations:
-      app_store_connect: file_sharing_plus
+      app_store_connect: file_sharing_plus_mac
     environment:
       groups:
         - store_credentials
