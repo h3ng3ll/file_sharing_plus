@@ -233,6 +233,33 @@ workflows:
     scripts:
       - name: Set up provisioning profiles
         script: |
+          set -e
+
+          echo "=== BEFORE ==="
+          grep -nE "CODE_SIGN|DEVELOPMENT_TEAM|PROVISIONING_PROFILE" \
+            macos/Runner.xcodeproj/project.pbxproj || true
+
+          echo ""
+          echo "=== CODemagic use-profiles ==="
+
+          xcode-project use-profiles --verbose
+
+          echo ""
+          echo "=== AFTER ==="
+          grep -nE "CODE_SIGN|DEVELOPMENT_TEAM|PROVISIONING_PROFILE" \
+            macos/Runner.xcodeproj/project.pbxproj || true
+
+          echo ""
+          echo "=== RELEASE BUILD SETTINGS ==="
+
+          xcodebuild \
+            -workspace macos/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -showBuildSettings |
+            grep -E "CODE_SIGN|DEVELOPMENT_TEAM|PROVISIONING_PROFILE" || true
+      - name: Set up provisioning profiles
+        script: |
           xcode-project use-profiles --verbose
 
       
