@@ -229,7 +229,8 @@ workflows:
       flutter: 3.44.4
       xcode: latest
       cocoapods: default
-      python3: latest
+      python3: default
+
     scripts:
       - name: Configure macOS signing
         script: |
