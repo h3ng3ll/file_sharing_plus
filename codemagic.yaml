@@ -231,33 +231,56 @@ workflows:
       cocoapods: default
 
     scripts:
-      - name: Set up provisioning profiles
+      - name: Configure macOS signing
         script: |
           set -e
 
-          echo "=== BEFORE ==="
-          grep -nE "CODE_SIGN|DEVELOPMENT_TEAM|PROVISIONING_PROFILE" \
-            macos/Runner.xcodeproj/project.pbxproj || true
+          PBXPROJ="macos/Runner.xcodeproj/project.pbxproj"
 
-          echo ""
-          echo "=== CODemagic use-profiles ==="
+          # Use the Team ID provided by Codemagic/App Store Connect environment.
+          if [ -z "$TEAM_ID" ]; then
+            echo "ERROR: TEAM_ID is not set"
+            exit 1
+          fi
 
-          xcode-project use-profiles --verbose
+          echo "TEAM_ID=$TEAM_ID"
 
-          echo ""
-          echo "=== AFTER ==="
-          grep -nE "CODE_SIGN|DEVELOPMENT_TEAM|PROVISIONING_PROFILE" \
-            macos/Runner.xcodeproj/project.pbxproj || true
+          # Make all macOS configurations use automatic signing.
+          sed -i '' -E \
+            's/CODE_SIGN_STYLE = [^;]+;/CODE_SIGN_STYLE = Automatic;/g' \
+            "$PBXPROJ"
 
-          echo ""
-          echo "=== RELEASE BUILD SETTINGS ==="
+          # Remove empty profile specifiers.
+          sed -i '' -E \
+            's/PROVISIONING_PROFILE_SPECIFIER = "";[[:space:]]*//g' \
+            "$PBXPROJ"
 
-          xcodebuild \
-            -workspace macos/Runner.xcworkspace \
-            -scheme Runner \
-            -configuration Release \
-            -showBuildSettings |
-            grep -E "CODE_SIGN|DEVELOPMENT_TEAM|PROVISIONING_PROFILE" || true
+          # Add DEVELOPMENT_TEAM to build configurations that don't have it.
+          python3 - <<PY
+            from pathlib import Path
+      
+            p = Path("$PBXPROJ")
+            text = p.read_text()
+      
+            team = "$TEAM_ID"
+      
+            lines = text.splitlines()
+            out = []
+      
+            for line in lines:
+              out.append(line)
+              
+              if "CODE_SIGN_STYLE = Automatic;" in line:
+                indent = line[:len(line) - len(line.lstrip())]
+                
+                # Don't duplicate DEVELOPMENT_TEAM
+                out.append(f"{indent}DEVELOPMENT_TEAM = {team};")
+      
+            p.write_text("\\n".join(out) + "\\n")
+            PY
+        
+          echo "=== CONFIGURED SIGNING ==="
+          grep -nE "CODE_SIGN|DEVELOPMENT_TEAM|PROVISIONING_PROFILE" "$PBXPROJ" || true
       - name: Set up provisioning profiles
         script: |
           xcode-project use-profiles --verbose
