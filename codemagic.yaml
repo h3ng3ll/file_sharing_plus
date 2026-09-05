@@ -282,7 +282,7 @@ workflows:
     publishing:
       app_store_connect:
         api_key: $MACOS_APPSTORE_P8
-        key_id: $APPSTORE_KEY_ID
+        key_id: $MACOS_APPSTORE_KEY_ID
         issuer_id: $APPSTORE_ISSUER_ID
         submit_to_testflight: true
         submit_to_app_store: false
