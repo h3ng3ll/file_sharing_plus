@@ -214,52 +214,71 @@ workflows:
     name: macOS Workflow
     max_build_duration: 120
     instance_type: mac_mini_m2
+
     integrations:
       app_store_connect: file_sharing_plus_mac
+
     environment:
       groups:
         - store_credentials
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: $IOS_BUNDLE_ID
+
       vars:
         BUNDLE_ID: "$IOS_BUNDLE_ID"
         APP_STORE_APPLE_ID: $APPSTORE_APP_ID
+
       flutter: 3.44.4
       xcode: latest
       cocoapods: default
+
     scripts:
       - name: Detach Xcode project from any developer account
         script: |
           PBXPROJ="macos/Runner.xcodeproj/project.pbxproj"
-          
+
           for KEY in DEVELOPMENT_TEAM CODE_SIGN_IDENTITY PROVISIONING_PROFILE PROVISIONING_PROFILE_SPECIFIER; do
             COUNT=$(grep -Ec "^[[:space:]]*$KEY = [^;]*;" "$PBXPROJ" 2>/dev/null || true)
             sed -i '' -E "/^[[:space:]]*$KEY = [^;]*;[[:space:]]*$/d" "$PBXPROJ"
             echo "Removed $KEY (${COUNT:-0} occurrence(s))"
           done
-          
+
           sed -i '' -E 's/CODE_SIGN_STYLE = [^;]*;/CODE_SIGN_STYLE = Automatic;/g' "$PBXPROJ"
 
-      - name: Set up provisioning profiles settings on Xcode project
+      - name: Set up provisioning profiles
         script: |
-            xcode-project use-profiles --verbose
+          xcode-project use-profiles --verbose
+
       - name: Clean Flutter project
         script: |
           flutter clean
+
       - name: Get Flutter packages
         script: |
           flutter pub get
+
       - name: Install pods
         script: |
           find . -name "Podfile" -execdir pod install \;
-      - name: Flutter build MacOS
+
+      - name: Build macOS
         script: |
           flutter build macos --release
+
+      - name: Create macOS PKG
+        script: |
+          mkdir -p build/macos/pkg
+
+          productbuild \
+            --component \
+            "build/macos/Build/Products/Release/File Sharing Plus.app" \
+            /Applications \
+            "build/macos/pkg/File-Sharing-Plus.pkg"
+
     artifacts:
+      - build/macos/pkg/*.pkg
       - build/macos/Build/Products/Release/*.app
       - build/macos/Build/Products/Release/*.dSYM
       - /tmp/xcodebuild_logs/*.log
+
     publishing:
       app_store_connect:
         api_key: $MACOS_APPSTORE_P8
