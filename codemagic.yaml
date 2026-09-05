@@ -238,7 +238,6 @@ workflows:
 
           PBXPROJ="macos/Runner.xcodeproj/project.pbxproj"
 
-          # Use the Team ID provided by Codemagic/App Store Connect environment.
           if [ -z "$TEAM_ID" ]; then
             echo "ERROR: TEAM_ID is not set"
             exit 1
@@ -246,42 +245,26 @@ workflows:
 
           echo "TEAM_ID=$TEAM_ID"
 
-          # Make all macOS configurations use automatic signing.
+          # All configurations use automatic signing.
           sed -i '' -E \
             's/CODE_SIGN_STYLE = [^;]+;/CODE_SIGN_STYLE = Automatic;/g' \
             "$PBXPROJ"
 
-          # Remove empty profile specifiers.
+          # Remove empty provisioning profile specifiers.
           sed -i '' -E \
             's/PROVISIONING_PROFILE_SPECIFIER = "";[[:space:]]*//g' \
             "$PBXPROJ"
 
-          # Add DEVELOPMENT_TEAM to build configurations that don't have it.
-          python3 - <<PY
-            from pathlib import Path
-      
-            p = Path("$PBXPROJ")
-            text = p.read_text()
-      
-            team = "$TEAM_ID"
-      
-            lines = text.splitlines()
-            out = []
-      
-            for line in lines:
-              out.append(line)
-              
-              if "CODE_SIGN_STYLE = Automatic;" in line:
-                indent = line[:len(line) - len(line.lstrip())]
-                
-                # Don't duplicate DEVELOPMENT_TEAM
-                out.append(f"{indent}DEVELOPMENT_TEAM = {team};")
-      
-            p.write_text("\\n".join(out) + "\\n")
-            PY
-        
+          # Add DEVELOPMENT_TEAM after every CODE_SIGN_STYLE setting.
+          sed -i '' -E \
+            "/CODE_SIGN_STYLE = Automatic;/a\\
+                        DEVELOPMENT_TEAM = $TEAM_ID;" \
+            "$PBXPROJ"
+
           echo "=== CONFIGURED SIGNING ==="
-          grep -nE "CODE_SIGN|DEVELOPMENT_TEAM|PROVISIONING_PROFILE" "$PBXPROJ" || true
+          grep -nE \
+            "CODE_SIGN|DEVELOPMENT_TEAM|PROVISIONING_PROFILE" \
+            "$PBXPROJ" || true
       - name: Set up provisioning profiles
         script: |
           xcode-project use-profiles --verbose
