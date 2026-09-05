@@ -216,7 +216,7 @@ workflows:
     instance_type: mac_mini_m2
 
     integrations:
-      app_store_connect: file_sharing_plus_mac
+      app_store_connect: sinergy_hub
 
     environment:
       groups:
