@@ -231,18 +231,6 @@ workflows:
       cocoapods: default
 
     scripts:
-      - name: Detach Xcode project from any developer account
-        script: |
-          PBXPROJ="macos/Runner.xcodeproj/project.pbxproj"
-
-          for KEY in DEVELOPMENT_TEAM CODE_SIGN_IDENTITY PROVISIONING_PROFILE PROVISIONING_PROFILE_SPECIFIER; do
-            COUNT=$(grep -Ec "^[[:space:]]*$KEY = [^;]*;" "$PBXPROJ" 2>/dev/null || true)
-            sed -i '' -E "/^[[:space:]]*$KEY = [^;]*;[[:space:]]*$/d" "$PBXPROJ"
-            echo "Removed $KEY (${COUNT:-0} occurrence(s))"
-          done
-
-          sed -i '' -E 's/CODE_SIGN_STYLE = [^;]*;/CODE_SIGN_STYLE = Automatic;/g' "$PBXPROJ"
-
       - name: Set up provisioning profiles
         script: |
           xcode-project use-profiles --verbose
