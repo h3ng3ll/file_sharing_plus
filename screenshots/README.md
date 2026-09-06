@@ -7,8 +7,11 @@ driven by seeded fake BLoC state from `integration_test/fixtures/`).
 ```
 screenshots/
 ├── macos/   # server UI, 2240×1520 (1120×760 @2×)
-└── ios/     # client UI, iPhone 16 Pro Max (1320×2868)
+├── ios/     # client UI, iPhone 16 Pro Max (1320×2868)
+└── ipad/    # client UI, iPad 12.9"/13" — 2048×2732 portrait, 2732×2048 landscape
 ```
+
+All iPad sizes are App Store-accepted values for the iPad set.
 
 ## Regenerate
 
@@ -37,9 +40,31 @@ flutter drive \
   --target=integration_test/screenshot_test.dart \
   -d macos
 
-cp ~/Library/Containers/com.example.fileSharing/Data/screenshots/macos/*.png \
+cp ~/Library/Containers/com.hengell.file-sharing-plus/Data/screenshots/macos/*.png \
    screenshots/macos/
 ```
+
+### iPad (client)
+
+iPad shots need **no simulator** — they use the same offscreen `RepaintBoundary`
+path as the macOS server screens, with the surface sized to an iPad viewport
+(1024×1366 dp @2× → 2048×2732 px; the landscape shot transposes to 2732×2048).
+They are produced by the same macOS run as above:
+
+```sh
+flutter drive \
+  --driver=test_driver/screenshot_driver.dart \
+  --target=integration_test/screenshot_test.dart \
+  -d macos
+
+cp ~/Library/Containers/com.hengell.file-sharing-plus/Data/screenshots/ipad/*.png \
+   screenshots/ipad/
+```
+
+iPadOS runs the **client** role, so these mirror the iOS client screens. Note
+that `SettingsPage` gates the sharing-port field on `Platform.isMacOS`; since the
+capture host *is* macOS, the harness renders `IpadSettingsView` — the client
+branch of that page — so the shot shows what a real iPad shows.
 
 When run on macOS the iOS group is skipped (and vice-versa) — the harness picks the
 screen set by `Platform.isMacOS`.
@@ -51,3 +76,6 @@ screen set by `Platform.isMacOS`.
   with `skip: !Platform.isMacOS` for server screens or `skip: Platform.isMacOS` for
   client screens). The screenshot name's `server-` / `client-` prefix routes it to
   the right platform folder.
+- For an iPad shot, add it to the `client (iPad)` group with `skip: !Platform.isMacOS`
+  and call `shootIpad(...)` (pass `landscape: true` for a landscape capture). It
+  writes straight to `screenshots/ipad/` and needs no driver routing.
