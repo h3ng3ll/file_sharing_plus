@@ -260,10 +260,21 @@ workflows:
           security find-identity -v | grep -E \
             "3rd Party Mac Developer Installer|Mac Installer Distribution"
 
-      - name: Set up provisioning profiles
+#      - name: Set up provisioning profiles
+#        script: |
+#          set -e
+#          xcode-project use-profiles --verbose
+      - name: Install provisioning profile
         script: |
           set -e
-          xcode-project use-profiles --verbose
+
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+
+          cp "$MAC_PROVISIONING_PROFILE" \
+            "$HOME/Library/MobileDevice/Provisioning Profiles/"
+
+          echo "=== INSTALLED PROFILES ==="
+          ls -la "$HOME/Library/MobileDevice/Provisioning Profiles/"
 
       - name: Configure macOS signing
         script: |
