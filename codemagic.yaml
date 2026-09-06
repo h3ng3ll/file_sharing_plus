@@ -215,60 +215,74 @@ workflows:
     max_build_duration: 120
     instance_type: mac_mini_m2
 
-    integrations:
-      app_store_connect: file_sharing_plus_mac
-
     environment:
       groups:
         - store_credentials
 
       vars:
         BUNDLE_ID: "$MACOS_BUNDLE_ID"
-        APP_STORE_APPLE_ID: $APPSTORE_APP_ID
+        APP_STORE_APPLE_ID: "$APPSTORE_APP_ID"
 
       flutter: 3.44.4
       xcode: latest
       cocoapods: default
 
     scripts:
+
+      - name: Initialize keychain
+        script: |
+          set -e
+          keychain initialize
+
+      - name: Import signing certificates
+        script: |
+          set -e
+
+          echo "$MAC_APP_DISTRIBUTION_P12" | base64 --decode > /tmp/mac_app_distribution.p12
+          echo "$MAC_INSTALLER_DISTRIBUTION_P12" | base64 --decode > /tmp/mac_installer_distribution.p12
+
+          keychain add-certificates \
+            /tmp/mac_app_distribution.p12 \
+            /tmp/mac_installer_distribution.p12
+
+      - name: Verify signing identities
+        script: |
+          set -e
+
+          echo "=== SIGNING IDENTITIES ==="
+          security find-identity -v
+
+          echo "=== MAC APP DISTRIBUTION ==="
+          security find-identity -v | grep -E \
+            "Mac Developer|3rd Party Mac Developer Application|Mac App Distribution"
+
+          echo "=== MAC INSTALLER DISTRIBUTION ==="
+          security find-identity -v | grep -E \
+            "3rd Party Mac Developer Installer|Mac Installer Distribution"
+
+      - name: Set up provisioning profiles
+        script: |
+          set -e
+          xcode-project use-profiles --verbose
+
       - name: Configure macOS signing
         script: |
           set -e
 
           PBXPROJ="macos/Runner.xcodeproj/project.pbxproj"
 
-          if [ -z "$TEAM_ID" ]; then
-            echo "ERROR: TEAM_ID is not set"
-            exit 1
-          fi
-
-          echo "TEAM_ID=$TEAM_ID"
-
-          # All configurations use automatic signing.
           sed -i '' -E \
-            's/CODE_SIGN_STYLE = [^;]+;/CODE_SIGN_STYLE = Automatic;/g' \
+            's/CODE_SIGN_STYLE = [^;]+;/CODE_SIGN_STYLE = Manual;/g' \
             "$PBXPROJ"
 
-          # Remove empty provisioning profile specifiers.
           sed -i '' -E \
-            's/PROVISIONING_PROFILE_SPECIFIER = "";[[:space:]]*//g' \
+            's/DEVELOPMENT_TEAM = [^;]+;/DEVELOPMENT_TEAM = '"$TEAM_ID"';/g' \
             "$PBXPROJ"
 
-          # Add DEVELOPMENT_TEAM after every CODE_SIGN_STYLE setting.
-          sed -i '' -E \
-            "/CODE_SIGN_STYLE = Automatic;/a\\
-                        DEVELOPMENT_TEAM = $TEAM_ID;" \
-            "$PBXPROJ"
-
-          echo "=== CONFIGURED SIGNING ==="
+          echo "=== SIGNING CONFIG ==="
           grep -nE \
             "CODE_SIGN|DEVELOPMENT_TEAM|PROVISIONING_PROFILE" \
             "$PBXPROJ" || true
-      - name: Set up provisioning profiles
-        script: |
-          xcode-project use-profiles --verbose
-
-      
 
       - name: Clean Flutter project
         script: |
@@ -284,30 +298,59 @@ workflows:
 
       - name: Build macOS
         script: |
+          set -e
           flutter build macos --release
 
       - name: Verify macOS app signing
         script: |
+          set -e
+
           APP="build/macos/Build/Products/Release/File Sharing Plus.app"
 
           echo "=== PROVISIONING PROFILE ==="
           ls -la "$APP/Contents/embedded.provisionprofile" || true
 
           echo "=== CODE SIGNATURE ==="
-          codesign -dv --verbose=4 "$APP" 2>&1 || true
+          codesign -dv --verbose=4 "$APP"
 
           echo "=== ENTITLEMENTS ==="
-          codesign -d --entitlements :- "$APP" 2>&1 || true
+          codesign -d --entitlements :- "$APP" || true
 
-      - name: Create macOS PKG
+          echo "=== VERIFY SIGNATURE ==="
+          codesign --verify --deep --strict --verbose=4 "$APP"
+
+      - name: Create signed PKG
         script: |
+          set -e
+
+          APP="build/macos/Build/Products/Release/File Sharing Plus.app"
+          PKG="build/macos/pkg/File-Sharing-Plus.pkg"
+
           mkdir -p build/macos/pkg
 
           productbuild \
-            --component \
-            "build/macos/Build/Products/Release/File Sharing Plus.app" \
+            --component "$APP" \
             /Applications \
+            --sign "$MAC_INSTALLER_SIGNING_IDENTITY" \
+            "$PKG"
+
+      - name: Verify PKG signature
+        script: |
+          set -e
+
+          pkgutil --check-signature \
             "build/macos/pkg/File-Sharing-Plus.pkg"
+
+      - name: Publish to App Store
+        script: |
+          set -e
+
+          xcrun altool \
+            --upload-app \
+            -f "build/macos/pkg/File-Sharing-Plus.pkg" \
+            -t macos \
+            -u "$APPLE_ID" \
+            --app-password "$APP_PASSWORD"
 
     artifacts:
       - build/macos/pkg/*.pkg
@@ -315,10 +358,10 @@ workflows:
       - build/macos/Build/Products/Release/*.dSYM
       - /tmp/xcodebuild_logs/*.log
 
-    publishing:
-      app_store_connect:
-        api_key: $MACOS_APPSTORE_P8
-        key_id: $MACOS_APPSTORE_KEY_ID
-        issuer_id: $APPSTORE_ISSUER_ID
-        submit_to_testflight: true
-        submit_to_app_store: false
+#    publishing:
+#      app_store_connect:
+#        api_key: $MACOS_APPSTORE_P8
+#        key_id: $MACOS_APPSTORE_KEY_ID
+#        issuer_id: $APPSTORE_ISSUER_ID
+#        submit_to_testflight: true
+#        submit_to_app_store: false
