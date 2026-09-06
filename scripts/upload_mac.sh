@@ -1,4 +1,10 @@
 
+# root of the project
+cd ..
+
+flutter build macos --release
+
+mkdir -p build/macos/pkg
 
 productbuild \
   --component "build/macos/Build/Products/Release/File Sharing Plus.app" \
