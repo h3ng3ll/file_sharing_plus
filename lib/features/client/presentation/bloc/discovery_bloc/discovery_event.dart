@@ -14,4 +14,16 @@ sealed class DiscoveryEvent with _$DiscoveryEvent {
     required String host,
     required int port,
   }) = _AddManual;
+
+  /// Verifies [server] is still reachable before the browser screen is opened.
+  ///
+  /// A discovered entry keeps the host and port resolved when mDNS first saw
+  /// it, so it goes stale the moment the Mac's server stops or restarts on a
+  /// different port. Pinging on tap turns that into a toast instead of a raw
+  /// connection error on an already-pushed screen.
+  const factory DiscoveryEvent.openServer(DiscoveredServer server) =
+      _OpenServer;
+
+  /// Clears a consumed one-shot navigation/error signal.
+  const factory DiscoveryEvent.consumeSignal() = _ConsumeSignal;
 }

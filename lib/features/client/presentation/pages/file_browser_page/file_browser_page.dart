@@ -65,8 +65,12 @@ class _FileBrowserPageState extends State<FileBrowserPage> {
         'Downloaded ${record.fileName} — choose where to save',
       );
       FileShareService.saveFile(
+        context,
         record.savedPath!,
         subject: record.fileName,
+        onError: (_) => UiMessageService.showError(
+          'Saved ${record.fileName}, but the share sheet could not open',
+        ),
       );
     } else {
       UiMessageService.showSuccess('$verb complete: ${record.fileName}');

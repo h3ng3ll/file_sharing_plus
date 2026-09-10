@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../../core/resources/colors/app_colors.dart';
 import '../../../../../../core/resources/text/app_text_style.dart';
 import '../../../../../../core/services/file_share_service.dart';
+import '../../../../../../core/services/ui_message_service.dart';
 import '../../../../../../core/widgets/custom_app_bar.dart';
 import '../../../../domain/models/transfer_progress.dart';
 import '../../../../domain/models/transfer_record.dart';
@@ -92,8 +93,12 @@ class _HistoryTile extends StatelessWidget {
             ),
       onTap: _canShare
           ? () => FileShareService.saveFile(
+                context,
                 record.savedPath!,
                 subject: record.fileName,
+                onError: (_) => UiMessageService.showError(
+                  'Could not open the share sheet for ${record.fileName}',
+                ),
               )
           : null,
     );
