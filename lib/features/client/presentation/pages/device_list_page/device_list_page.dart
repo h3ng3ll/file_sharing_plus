@@ -55,6 +55,20 @@ class _DeviceListPageState extends State<DeviceListPage> {
     _bloc.add(DiscoveryEvent.openServer(server));
   }
 
+  void _onRescan() {
+    _bloc.add(const DiscoveryEvent.rescan());
+    UiMessageService.showInfo('Scanning for Macs…');
+  }
+
+  void _onRemoveServer(DiscoveredServer server) {
+    _bloc.add(DiscoveryEvent.removeServer(server));
+    UiMessageService.showInfo(
+      server.isManual
+          ? 'Removed ${server.name}'
+          : 'Hid ${server.name} — it reappears when discovered again',
+    );
+  }
+
   void _onSignal(BuildContext context, DiscoveryState state) {
     final unreachable = state.unreachableMessage;
     final verified = state.verifiedServer;
@@ -91,6 +105,11 @@ class _DeviceListPageState extends State<DeviceListPage> {
             title: 'Available Devices',
           actions: [
             IconButton(
+              icon: const Icon(Icons.refresh),
+              tooltip: 'Rescan',
+              onPressed: _onRescan,
+            ),
+            IconButton(
               icon: const Icon(Icons.info_outline),
               tooltip: 'How to use',
               onPressed: () => context.push(AppRoutes.clientInfo),
@@ -102,7 +121,10 @@ class _DeviceListPageState extends State<DeviceListPage> {
             ),
           ],
         ),
-          body: DeviceListView(onTapServer: _onTapServer),
+          body: DeviceListView(
+            onTapServer: _onTapServer,
+            onRemoveServer: _onRemoveServer,
+          ),
         ),
       ),
     );

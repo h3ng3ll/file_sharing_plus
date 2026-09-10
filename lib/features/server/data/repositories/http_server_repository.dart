@@ -19,8 +19,23 @@ class HttpServerRepository implements IServerRepository {
   HttpServer? _server;
   String? _sharedFolder;
 
+  /// How long a device with no open event stream stays listed after its last
+  /// request. HTTP is stateless, so an idle client is only distinguishable
+  /// from a departed one by elapsed time.
+  static const Duration _kDeviceIdleTimeout = Duration(seconds: 30);
+
+  /// How often idle devices are swept out of the list.
+  static const Duration _kDeviceSweepInterval = Duration(seconds: 5);
+
   /// Connected event sockets, each tracking the folder path it is watching.
   final _sockets = <WebSocket, String>{};
+
+  /// Remote address behind each event socket, so a closing socket can mark
+  /// the right device disconnected.
+  final _socketAddresses = <WebSocket, String>{};
+
+  /// Drops devices that stopped making requests and hold no event stream.
+  Timer? _deviceSweep;
 
   /// Active filesystem watch on the shared folder, if any.
   StreamSubscription<FileSystemEvent>? _folderWatch;
@@ -58,6 +73,11 @@ class HttpServerRepository implements IServerRepository {
 
     unawaited(server.forEach(_handleRequest));
     _startFolderWatch();
+    // Idle devices must age out even when no further request arrives.
+    _deviceSweep = Timer.periodic(
+      _kDeviceSweepInterval,
+      (_) => _refreshDevicePresence(),
+    );
     return server.port;
   }
 
@@ -68,10 +88,14 @@ class HttpServerRepository implements IServerRepository {
     _watchDebounce?.cancel();
     _watchDebounce = null;
 
+    _deviceSweep?.cancel();
+    _deviceSweep = null;
+
     for (final socket in _sockets.keys.toList()) {
       await socket.close();
     }
     _sockets.clear();
+    _socketAddresses.clear();
 
     // Devices are per-session: drop them and publish the cleared list so a
     // restart never resurrects the previous session's clients.
@@ -300,8 +324,11 @@ class HttpServerRepository implements IServerRepository {
     // Only a completed upgrade is a real connection: a browser opening this
     // path with a plain GET throws above this line and must not be tracked.
     final socket = await WebSocketTransformer.upgrade(request);
+    final address = request.connectionInfo?.remoteAddress.address;
     _trackDevice(request);
     _sockets[socket] = '';
+    if (address != null) _socketAddresses[socket] = address;
+    _refreshDevicePresence();
     _log(ActivityType.connection, 'Event stream opened');
 
     socket.listen(
@@ -317,8 +344,8 @@ class HttpServerRepository implements IServerRepository {
           // Ignore malformed client messages.
         }
       },
-      onDone: () => _sockets.remove(socket),
-      onError: (_) => _sockets.remove(socket),
+      onDone: () => _releaseSocket(socket),
+      onError: (_) => _releaseSocket(socket),
       cancelOnError: true,
     );
   }
@@ -408,11 +435,53 @@ class HttpServerRepository implements IServerRepository {
       address: address,
       lastSeen: DateTime.now(),
       requestCount: (existing?.requestCount ?? 0) + 1,
+      hasOpenEventStream: _socketAddresses.values.contains(address),
     );
     _devicesController.add(_devices.values.toList());
     if (isNew) {
       _log(ActivityType.connection, 'Device connected: $address');
     }
+  }
+
+  /// Forgets [socket] and marks its device disconnected if it held the last
+  /// event stream for that address.
+  void _releaseSocket(WebSocket socket) {
+    _sockets.remove(socket);
+    _socketAddresses.remove(socket);
+    _refreshDevicePresence();
+  }
+
+  /// Re-derives [ConnectedDevice.hasOpenEventStream] from the live socket set
+  /// and drops devices that are neither streaming nor recently active.
+  void _refreshDevicePresence() {
+    final streaming = _socketAddresses.values.toSet();
+    final now = DateTime.now();
+    var changed = false;
+
+    for (final address in _devices.keys.toList()) {
+      final device = _devices[address]!;
+      final isStreaming = streaming.contains(address);
+      final isIdle = now.difference(device.lastSeen) > _kDeviceIdleTimeout;
+
+      // A device with no event stream that has also stopped making requests
+      // has left: nothing else can tell us, so time is the only evidence.
+      if (!isStreaming && isIdle) {
+        _devices.remove(address);
+        _log(ActivityType.connection, 'Device disconnected: $address');
+        changed = true;
+        continue;
+      }
+
+      if (device.hasOpenEventStream != isStreaming) {
+        _devices[address] = device.copyWith(hasOpenEventStream: isStreaming);
+        if (!isStreaming) {
+          _log(ActivityType.connection, 'Event stream closed: $address');
+        }
+        changed = true;
+      }
+    }
+
+    if (changed) _devicesController.add(_devices.values.toList());
   }
 
   void _writeJson(HttpResponse response, Map<String, dynamic> body) {

@@ -14,7 +14,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ConnectedDevice {
 
- String get address; DateTime get lastSeen; int get requestCount;
+ String get address; DateTime get lastSeen; int get requestCount;/// Whether this device currently holds an open `/events` WebSocket.
+ bool get hasOpenEventStream;
 /// Create a copy of ConnectedDevice
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +26,16 @@ $ConnectedDeviceCopyWith<ConnectedDevice> get copyWith => _$ConnectedDeviceCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ConnectedDevice&&(identical(other.address, address) || other.address == address)&&(identical(other.lastSeen, lastSeen) || other.lastSeen == lastSeen)&&(identical(other.requestCount, requestCount) || other.requestCount == requestCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ConnectedDevice&&(identical(other.address, address) || other.address == address)&&(identical(other.lastSeen, lastSeen) || other.lastSeen == lastSeen)&&(identical(other.requestCount, requestCount) || other.requestCount == requestCount)&&(identical(other.hasOpenEventStream, hasOpenEventStream) || other.hasOpenEventStream == hasOpenEventStream));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,address,lastSeen,requestCount);
+int get hashCode => Object.hash(runtimeType,address,lastSeen,requestCount,hasOpenEventStream);
 
 @override
 String toString() {
-  return 'ConnectedDevice(address: $address, lastSeen: $lastSeen, requestCount: $requestCount)';
+  return 'ConnectedDevice(address: $address, lastSeen: $lastSeen, requestCount: $requestCount, hasOpenEventStream: $hasOpenEventStream)';
 }
 
 
@@ -45,7 +46,7 @@ abstract mixin class $ConnectedDeviceCopyWith<$Res>  {
   factory $ConnectedDeviceCopyWith(ConnectedDevice value, $Res Function(ConnectedDevice) _then) = _$ConnectedDeviceCopyWithImpl;
 @useResult
 $Res call({
- String address, DateTime lastSeen, int requestCount
+ String address, DateTime lastSeen, int requestCount, bool hasOpenEventStream
 });
 
 
@@ -62,12 +63,13 @@ class _$ConnectedDeviceCopyWithImpl<$Res>
 
 /// Create a copy of ConnectedDevice
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? address = null,Object? lastSeen = null,Object? requestCount = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? address = null,Object? lastSeen = null,Object? requestCount = null,Object? hasOpenEventStream = null,}) {
   return _then(_self.copyWith(
 address: null == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
 as String,lastSeen: null == lastSeen ? _self.lastSeen : lastSeen // ignore: cast_nullable_to_non_nullable
 as DateTime,requestCount: null == requestCount ? _self.requestCount : requestCount // ignore: cast_nullable_to_non_nullable
-as int,
+as int,hasOpenEventStream: null == hasOpenEventStream ? _self.hasOpenEventStream : hasOpenEventStream // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -149,10 +151,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String address,  DateTime lastSeen,  int requestCount)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String address,  DateTime lastSeen,  int requestCount,  bool hasOpenEventStream)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ConnectedDevice() when $default != null:
-return $default(_that.address,_that.lastSeen,_that.requestCount);case _:
+return $default(_that.address,_that.lastSeen,_that.requestCount,_that.hasOpenEventStream);case _:
   return orElse();
 
 }
@@ -170,10 +172,10 @@ return $default(_that.address,_that.lastSeen,_that.requestCount);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String address,  DateTime lastSeen,  int requestCount)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String address,  DateTime lastSeen,  int requestCount,  bool hasOpenEventStream)  $default,) {final _that = this;
 switch (_that) {
 case _ConnectedDevice():
-return $default(_that.address,_that.lastSeen,_that.requestCount);}
+return $default(_that.address,_that.lastSeen,_that.requestCount,_that.hasOpenEventStream);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -187,10 +189,10 @@ return $default(_that.address,_that.lastSeen,_that.requestCount);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String address,  DateTime lastSeen,  int requestCount)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String address,  DateTime lastSeen,  int requestCount,  bool hasOpenEventStream)?  $default,) {final _that = this;
 switch (_that) {
 case _ConnectedDevice() when $default != null:
-return $default(_that.address,_that.lastSeen,_that.requestCount);case _:
+return $default(_that.address,_that.lastSeen,_that.requestCount,_that.hasOpenEventStream);case _:
   return null;
 
 }
@@ -202,12 +204,14 @@ return $default(_that.address,_that.lastSeen,_that.requestCount);case _:
 
 
 class _ConnectedDevice implements ConnectedDevice {
-  const _ConnectedDevice({required this.address, required this.lastSeen, this.requestCount = 0});
+  const _ConnectedDevice({required this.address, required this.lastSeen, this.requestCount = 0, this.hasOpenEventStream = false});
   
 
 @override final  String address;
 @override final  DateTime lastSeen;
 @override@JsonKey() final  int requestCount;
+/// Whether this device currently holds an open `/events` WebSocket.
+@override@JsonKey() final  bool hasOpenEventStream;
 
 /// Create a copy of ConnectedDevice
 /// with the given fields replaced by the non-null parameter values.
@@ -219,16 +223,16 @@ _$ConnectedDeviceCopyWith<_ConnectedDevice> get copyWith => __$ConnectedDeviceCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ConnectedDevice&&(identical(other.address, address) || other.address == address)&&(identical(other.lastSeen, lastSeen) || other.lastSeen == lastSeen)&&(identical(other.requestCount, requestCount) || other.requestCount == requestCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ConnectedDevice&&(identical(other.address, address) || other.address == address)&&(identical(other.lastSeen, lastSeen) || other.lastSeen == lastSeen)&&(identical(other.requestCount, requestCount) || other.requestCount == requestCount)&&(identical(other.hasOpenEventStream, hasOpenEventStream) || other.hasOpenEventStream == hasOpenEventStream));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,address,lastSeen,requestCount);
+int get hashCode => Object.hash(runtimeType,address,lastSeen,requestCount,hasOpenEventStream);
 
 @override
 String toString() {
-  return 'ConnectedDevice(address: $address, lastSeen: $lastSeen, requestCount: $requestCount)';
+  return 'ConnectedDevice(address: $address, lastSeen: $lastSeen, requestCount: $requestCount, hasOpenEventStream: $hasOpenEventStream)';
 }
 
 
@@ -239,7 +243,7 @@ abstract mixin class _$ConnectedDeviceCopyWith<$Res> implements $ConnectedDevice
   factory _$ConnectedDeviceCopyWith(_ConnectedDevice value, $Res Function(_ConnectedDevice) _then) = __$ConnectedDeviceCopyWithImpl;
 @override @useResult
 $Res call({
- String address, DateTime lastSeen, int requestCount
+ String address, DateTime lastSeen, int requestCount, bool hasOpenEventStream
 });
 
 
@@ -256,12 +260,13 @@ class __$ConnectedDeviceCopyWithImpl<$Res>
 
 /// Create a copy of ConnectedDevice
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? address = null,Object? lastSeen = null,Object? requestCount = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? address = null,Object? lastSeen = null,Object? requestCount = null,Object? hasOpenEventStream = null,}) {
   return _then(_ConnectedDevice(
 address: null == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
 as String,lastSeen: null == lastSeen ? _self.lastSeen : lastSeen // ignore: cast_nullable_to_non_nullable
 as DateTime,requestCount: null == requestCount ? _self.requestCount : requestCount // ignore: cast_nullable_to_non_nullable
-as int,
+as int,hasOpenEventStream: null == hasOpenEventStream ? _self.hasOpenEventStream : hasOpenEventStream // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

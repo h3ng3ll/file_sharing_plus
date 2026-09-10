@@ -204,6 +204,38 @@ void main() {
     });
   });
 
+  test('closing the event stream marks the device disconnected', () {
+    return _withRealHttp(() async {
+      final emissions = <List<ConnectedDevice>>[];
+      final sub = server.connectedDevices.listen(emissions.add);
+      addTearDown(sub.cancel);
+
+      final watch = client.watchFiles(server: device);
+      final events = StreamQueue<List<FileEntry>>(watch.files);
+      watch.watch('');
+      await events.next.timeout(const Duration(seconds: 5));
+
+      // While the socket is open the device is genuinely connected.
+      expect(
+        emissions.last.single.hasOpenEventStream,
+        isTrue,
+        reason: 'an open /events socket means the client is present',
+      );
+
+      await events.cancel();
+      await watch.close();
+
+      // Closing it must flip the flag — this is the real disconnect signal,
+      // and it must not wait for the idle timeout.
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      expect(
+        emissions.last.single.hasOpenEventStream,
+        isFalse,
+        reason: 'a closed socket must not still read as connected',
+      );
+    });
+  });
+
   test('a failed browser request registers no connected device', () {
     return _withRealHttp(() async {
       final browser = HttpClient();

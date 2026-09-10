@@ -24,6 +24,19 @@ sealed class DiscoveryEvent with _$DiscoveryEvent {
   const factory DiscoveryEvent.openServer(DiscoveredServer server) =
       _OpenServer;
 
+  /// Removes [server] from the list.
+  ///
+  /// A manual entry is forgotten permanently. A discovered entry is only
+  /// hidden until mDNS advertises it again, since discovery owns that list.
+  const factory DiscoveryEvent.removeServer(DiscoveredServer server) =
+      _RemoveServer;
+
+  /// Restarts the mDNS scan, re-resolving what is currently advertised.
+  const factory DiscoveryEvent.rescan() = _Rescan;
+
+  /// Probes every listed server so each row shows a live status.
+  const factory DiscoveryEvent.refreshReachability() = _RefreshReachability;
+
   /// Clears a consumed one-shot navigation/error signal.
   const factory DiscoveryEvent.consumeSignal() = _ConsumeSignal;
 }
