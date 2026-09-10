@@ -612,7 +612,10 @@ mixin _$DiscoveryState {
 
  DiscoveryStatus get status; List<DiscoveredServer> get discovered; List<DiscoveredServer> get manual; String get errorMessage;/// The server whose reachability is currently being checked, so only that
 /// row shows a spinner.
- DiscoveredServer? get checkingServer;/// Last known reachability per server id, refreshed on every scan.
+ DiscoveredServer? get checkingServer;/// Ids the user removed. mDNS keeps advertising a service after a swipe,
+/// so without this the next discovery emission re-adds it immediately.
+/// Cleared by an explicit rescan.
+ Set<String> get dismissedIds;/// Last known reachability per server id, refreshed on every scan.
  Map<String, ServerReachability> get reachability;/// Set once when a tapped server is confirmed reachable; the screen
 /// navigates and then clears it via [DiscoveryEvent.consumeSignal].
  DiscoveredServer? get verifiedServer;/// Set once when a tapped server turns out to be unreachable; the screen
@@ -628,16 +631,16 @@ $DiscoveryStateCopyWith<DiscoveryState> get copyWith => _$DiscoveryStateCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DiscoveryState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.discovered, discovered)&&const DeepCollectionEquality().equals(other.manual, manual)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.checkingServer, checkingServer) || other.checkingServer == checkingServer)&&const DeepCollectionEquality().equals(other.reachability, reachability)&&(identical(other.verifiedServer, verifiedServer) || other.verifiedServer == verifiedServer)&&(identical(other.unreachableMessage, unreachableMessage) || other.unreachableMessage == unreachableMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DiscoveryState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.discovered, discovered)&&const DeepCollectionEquality().equals(other.manual, manual)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.checkingServer, checkingServer) || other.checkingServer == checkingServer)&&const DeepCollectionEquality().equals(other.dismissedIds, dismissedIds)&&const DeepCollectionEquality().equals(other.reachability, reachability)&&(identical(other.verifiedServer, verifiedServer) || other.verifiedServer == verifiedServer)&&(identical(other.unreachableMessage, unreachableMessage) || other.unreachableMessage == unreachableMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(discovered),const DeepCollectionEquality().hash(manual),errorMessage,checkingServer,const DeepCollectionEquality().hash(reachability),verifiedServer,unreachableMessage);
+int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(discovered),const DeepCollectionEquality().hash(manual),errorMessage,checkingServer,const DeepCollectionEquality().hash(dismissedIds),const DeepCollectionEquality().hash(reachability),verifiedServer,unreachableMessage);
 
 @override
 String toString() {
-  return 'DiscoveryState(status: $status, discovered: $discovered, manual: $manual, errorMessage: $errorMessage, checkingServer: $checkingServer, reachability: $reachability, verifiedServer: $verifiedServer, unreachableMessage: $unreachableMessage)';
+  return 'DiscoveryState(status: $status, discovered: $discovered, manual: $manual, errorMessage: $errorMessage, checkingServer: $checkingServer, dismissedIds: $dismissedIds, reachability: $reachability, verifiedServer: $verifiedServer, unreachableMessage: $unreachableMessage)';
 }
 
 
@@ -648,7 +651,7 @@ abstract mixin class $DiscoveryStateCopyWith<$Res>  {
   factory $DiscoveryStateCopyWith(DiscoveryState value, $Res Function(DiscoveryState) _then) = _$DiscoveryStateCopyWithImpl;
 @useResult
 $Res call({
- DiscoveryStatus status, List<DiscoveredServer> discovered, List<DiscoveredServer> manual, String errorMessage, DiscoveredServer? checkingServer, Map<String, ServerReachability> reachability, DiscoveredServer? verifiedServer, String? unreachableMessage
+ DiscoveryStatus status, List<DiscoveredServer> discovered, List<DiscoveredServer> manual, String errorMessage, DiscoveredServer? checkingServer, Set<String> dismissedIds, Map<String, ServerReachability> reachability, DiscoveredServer? verifiedServer, String? unreachableMessage
 });
 
 
@@ -665,14 +668,15 @@ class _$DiscoveryStateCopyWithImpl<$Res>
 
 /// Create a copy of DiscoveryState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? discovered = null,Object? manual = null,Object? errorMessage = null,Object? checkingServer = freezed,Object? reachability = null,Object? verifiedServer = freezed,Object? unreachableMessage = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? discovered = null,Object? manual = null,Object? errorMessage = null,Object? checkingServer = freezed,Object? dismissedIds = null,Object? reachability = null,Object? verifiedServer = freezed,Object? unreachableMessage = freezed,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as DiscoveryStatus,discovered: null == discovered ? _self.discovered : discovered // ignore: cast_nullable_to_non_nullable
 as List<DiscoveredServer>,manual: null == manual ? _self.manual : manual // ignore: cast_nullable_to_non_nullable
 as List<DiscoveredServer>,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String,checkingServer: freezed == checkingServer ? _self.checkingServer : checkingServer // ignore: cast_nullable_to_non_nullable
-as DiscoveredServer?,reachability: null == reachability ? _self.reachability : reachability // ignore: cast_nullable_to_non_nullable
+as DiscoveredServer?,dismissedIds: null == dismissedIds ? _self.dismissedIds : dismissedIds // ignore: cast_nullable_to_non_nullable
+as Set<String>,reachability: null == reachability ? _self.reachability : reachability // ignore: cast_nullable_to_non_nullable
 as Map<String, ServerReachability>,verifiedServer: freezed == verifiedServer ? _self.verifiedServer : verifiedServer // ignore: cast_nullable_to_non_nullable
 as DiscoveredServer?,unreachableMessage: freezed == unreachableMessage ? _self.unreachableMessage : unreachableMessage // ignore: cast_nullable_to_non_nullable
 as String?,
@@ -757,10 +761,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DiscoveryStatus status,  List<DiscoveredServer> discovered,  List<DiscoveredServer> manual,  String errorMessage,  DiscoveredServer? checkingServer,  Map<String, ServerReachability> reachability,  DiscoveredServer? verifiedServer,  String? unreachableMessage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DiscoveryStatus status,  List<DiscoveredServer> discovered,  List<DiscoveredServer> manual,  String errorMessage,  DiscoveredServer? checkingServer,  Set<String> dismissedIds,  Map<String, ServerReachability> reachability,  DiscoveredServer? verifiedServer,  String? unreachableMessage)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DiscoveryState() when $default != null:
-return $default(_that.status,_that.discovered,_that.manual,_that.errorMessage,_that.checkingServer,_that.reachability,_that.verifiedServer,_that.unreachableMessage);case _:
+return $default(_that.status,_that.discovered,_that.manual,_that.errorMessage,_that.checkingServer,_that.dismissedIds,_that.reachability,_that.verifiedServer,_that.unreachableMessage);case _:
   return orElse();
 
 }
@@ -778,10 +782,10 @@ return $default(_that.status,_that.discovered,_that.manual,_that.errorMessage,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DiscoveryStatus status,  List<DiscoveredServer> discovered,  List<DiscoveredServer> manual,  String errorMessage,  DiscoveredServer? checkingServer,  Map<String, ServerReachability> reachability,  DiscoveredServer? verifiedServer,  String? unreachableMessage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DiscoveryStatus status,  List<DiscoveredServer> discovered,  List<DiscoveredServer> manual,  String errorMessage,  DiscoveredServer? checkingServer,  Set<String> dismissedIds,  Map<String, ServerReachability> reachability,  DiscoveredServer? verifiedServer,  String? unreachableMessage)  $default,) {final _that = this;
 switch (_that) {
 case _DiscoveryState():
-return $default(_that.status,_that.discovered,_that.manual,_that.errorMessage,_that.checkingServer,_that.reachability,_that.verifiedServer,_that.unreachableMessage);}
+return $default(_that.status,_that.discovered,_that.manual,_that.errorMessage,_that.checkingServer,_that.dismissedIds,_that.reachability,_that.verifiedServer,_that.unreachableMessage);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -795,10 +799,10 @@ return $default(_that.status,_that.discovered,_that.manual,_that.errorMessage,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DiscoveryStatus status,  List<DiscoveredServer> discovered,  List<DiscoveredServer> manual,  String errorMessage,  DiscoveredServer? checkingServer,  Map<String, ServerReachability> reachability,  DiscoveredServer? verifiedServer,  String? unreachableMessage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DiscoveryStatus status,  List<DiscoveredServer> discovered,  List<DiscoveredServer> manual,  String errorMessage,  DiscoveredServer? checkingServer,  Set<String> dismissedIds,  Map<String, ServerReachability> reachability,  DiscoveredServer? verifiedServer,  String? unreachableMessage)?  $default,) {final _that = this;
 switch (_that) {
 case _DiscoveryState() when $default != null:
-return $default(_that.status,_that.discovered,_that.manual,_that.errorMessage,_that.checkingServer,_that.reachability,_that.verifiedServer,_that.unreachableMessage);case _:
+return $default(_that.status,_that.discovered,_that.manual,_that.errorMessage,_that.checkingServer,_that.dismissedIds,_that.reachability,_that.verifiedServer,_that.unreachableMessage);case _:
   return null;
 
 }
@@ -810,7 +814,7 @@ return $default(_that.status,_that.discovered,_that.manual,_that.errorMessage,_t
 
 
 class _DiscoveryState implements DiscoveryState {
-  const _DiscoveryState({this.status = DiscoveryStatus.initial, final  List<DiscoveredServer> discovered = const <DiscoveredServer>[], final  List<DiscoveredServer> manual = const <DiscoveredServer>[], this.errorMessage = '', this.checkingServer, final  Map<String, ServerReachability> reachability = const <String, ServerReachability>{}, this.verifiedServer, this.unreachableMessage}): _discovered = discovered,_manual = manual,_reachability = reachability;
+  const _DiscoveryState({this.status = DiscoveryStatus.initial, final  List<DiscoveredServer> discovered = const <DiscoveredServer>[], final  List<DiscoveredServer> manual = const <DiscoveredServer>[], this.errorMessage = '', this.checkingServer, final  Set<String> dismissedIds = const <String>{}, final  Map<String, ServerReachability> reachability = const <String, ServerReachability>{}, this.verifiedServer, this.unreachableMessage}): _discovered = discovered,_manual = manual,_dismissedIds = dismissedIds,_reachability = reachability;
   
 
 @override@JsonKey() final  DiscoveryStatus status;
@@ -832,6 +836,19 @@ class _DiscoveryState implements DiscoveryState {
 /// The server whose reachability is currently being checked, so only that
 /// row shows a spinner.
 @override final  DiscoveredServer? checkingServer;
+/// Ids the user removed. mDNS keeps advertising a service after a swipe,
+/// so without this the next discovery emission re-adds it immediately.
+/// Cleared by an explicit rescan.
+ final  Set<String> _dismissedIds;
+/// Ids the user removed. mDNS keeps advertising a service after a swipe,
+/// so without this the next discovery emission re-adds it immediately.
+/// Cleared by an explicit rescan.
+@override@JsonKey() Set<String> get dismissedIds {
+  if (_dismissedIds is EqualUnmodifiableSetView) return _dismissedIds;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableSetView(_dismissedIds);
+}
+
 /// Last known reachability per server id, refreshed on every scan.
  final  Map<String, ServerReachability> _reachability;
 /// Last known reachability per server id, refreshed on every scan.
@@ -858,16 +875,16 @@ _$DiscoveryStateCopyWith<_DiscoveryState> get copyWith => __$DiscoveryStateCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DiscoveryState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._discovered, _discovered)&&const DeepCollectionEquality().equals(other._manual, _manual)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.checkingServer, checkingServer) || other.checkingServer == checkingServer)&&const DeepCollectionEquality().equals(other._reachability, _reachability)&&(identical(other.verifiedServer, verifiedServer) || other.verifiedServer == verifiedServer)&&(identical(other.unreachableMessage, unreachableMessage) || other.unreachableMessage == unreachableMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DiscoveryState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._discovered, _discovered)&&const DeepCollectionEquality().equals(other._manual, _manual)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.checkingServer, checkingServer) || other.checkingServer == checkingServer)&&const DeepCollectionEquality().equals(other._dismissedIds, _dismissedIds)&&const DeepCollectionEquality().equals(other._reachability, _reachability)&&(identical(other.verifiedServer, verifiedServer) || other.verifiedServer == verifiedServer)&&(identical(other.unreachableMessage, unreachableMessage) || other.unreachableMessage == unreachableMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_discovered),const DeepCollectionEquality().hash(_manual),errorMessage,checkingServer,const DeepCollectionEquality().hash(_reachability),verifiedServer,unreachableMessage);
+int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_discovered),const DeepCollectionEquality().hash(_manual),errorMessage,checkingServer,const DeepCollectionEquality().hash(_dismissedIds),const DeepCollectionEquality().hash(_reachability),verifiedServer,unreachableMessage);
 
 @override
 String toString() {
-  return 'DiscoveryState(status: $status, discovered: $discovered, manual: $manual, errorMessage: $errorMessage, checkingServer: $checkingServer, reachability: $reachability, verifiedServer: $verifiedServer, unreachableMessage: $unreachableMessage)';
+  return 'DiscoveryState(status: $status, discovered: $discovered, manual: $manual, errorMessage: $errorMessage, checkingServer: $checkingServer, dismissedIds: $dismissedIds, reachability: $reachability, verifiedServer: $verifiedServer, unreachableMessage: $unreachableMessage)';
 }
 
 
@@ -878,7 +895,7 @@ abstract mixin class _$DiscoveryStateCopyWith<$Res> implements $DiscoveryStateCo
   factory _$DiscoveryStateCopyWith(_DiscoveryState value, $Res Function(_DiscoveryState) _then) = __$DiscoveryStateCopyWithImpl;
 @override @useResult
 $Res call({
- DiscoveryStatus status, List<DiscoveredServer> discovered, List<DiscoveredServer> manual, String errorMessage, DiscoveredServer? checkingServer, Map<String, ServerReachability> reachability, DiscoveredServer? verifiedServer, String? unreachableMessage
+ DiscoveryStatus status, List<DiscoveredServer> discovered, List<DiscoveredServer> manual, String errorMessage, DiscoveredServer? checkingServer, Set<String> dismissedIds, Map<String, ServerReachability> reachability, DiscoveredServer? verifiedServer, String? unreachableMessage
 });
 
 
@@ -895,14 +912,15 @@ class __$DiscoveryStateCopyWithImpl<$Res>
 
 /// Create a copy of DiscoveryState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? discovered = null,Object? manual = null,Object? errorMessage = null,Object? checkingServer = freezed,Object? reachability = null,Object? verifiedServer = freezed,Object? unreachableMessage = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? discovered = null,Object? manual = null,Object? errorMessage = null,Object? checkingServer = freezed,Object? dismissedIds = null,Object? reachability = null,Object? verifiedServer = freezed,Object? unreachableMessage = freezed,}) {
   return _then(_DiscoveryState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as DiscoveryStatus,discovered: null == discovered ? _self._discovered : discovered // ignore: cast_nullable_to_non_nullable
 as List<DiscoveredServer>,manual: null == manual ? _self._manual : manual // ignore: cast_nullable_to_non_nullable
 as List<DiscoveredServer>,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String,checkingServer: freezed == checkingServer ? _self.checkingServer : checkingServer // ignore: cast_nullable_to_non_nullable
-as DiscoveredServer?,reachability: null == reachability ? _self._reachability : reachability // ignore: cast_nullable_to_non_nullable
+as DiscoveredServer?,dismissedIds: null == dismissedIds ? _self._dismissedIds : dismissedIds // ignore: cast_nullable_to_non_nullable
+as Set<String>,reachability: null == reachability ? _self._reachability : reachability // ignore: cast_nullable_to_non_nullable
 as Map<String, ServerReachability>,verifiedServer: freezed == verifiedServer ? _self.verifiedServer : verifiedServer // ignore: cast_nullable_to_non_nullable
 as DiscoveredServer?,unreachableMessage: freezed == unreachableMessage ? _self.unreachableMessage : unreachableMessage // ignore: cast_nullable_to_non_nullable
 as String?,
