@@ -55,13 +55,15 @@ extension DiscoveryEventPatterns on DiscoveryEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Start value)?  start,TResult Function( _DiscoveredUpdated value)?  discoveredUpdated,TResult Function( _AddManual value)?  addManual,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Start value)?  start,TResult Function( _DiscoveredUpdated value)?  discoveredUpdated,TResult Function( _AddManual value)?  addManual,TResult Function( _OpenServer value)?  openServer,TResult Function( _ConsumeSignal value)?  consumeSignal,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Start() when start != null:
 return start(_that);case _DiscoveredUpdated() when discoveredUpdated != null:
 return discoveredUpdated(_that);case _AddManual() when addManual != null:
-return addManual(_that);case _:
+return addManual(_that);case _OpenServer() when openServer != null:
+return openServer(_that);case _ConsumeSignal() when consumeSignal != null:
+return consumeSignal(_that);case _:
   return orElse();
 
 }
@@ -79,13 +81,15 @@ return addManual(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Start value)  start,required TResult Function( _DiscoveredUpdated value)  discoveredUpdated,required TResult Function( _AddManual value)  addManual,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Start value)  start,required TResult Function( _DiscoveredUpdated value)  discoveredUpdated,required TResult Function( _AddManual value)  addManual,required TResult Function( _OpenServer value)  openServer,required TResult Function( _ConsumeSignal value)  consumeSignal,}){
 final _that = this;
 switch (_that) {
 case _Start():
 return start(_that);case _DiscoveredUpdated():
 return discoveredUpdated(_that);case _AddManual():
-return addManual(_that);}
+return addManual(_that);case _OpenServer():
+return openServer(_that);case _ConsumeSignal():
+return consumeSignal(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -99,13 +103,15 @@ return addManual(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Start value)?  start,TResult? Function( _DiscoveredUpdated value)?  discoveredUpdated,TResult? Function( _AddManual value)?  addManual,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Start value)?  start,TResult? Function( _DiscoveredUpdated value)?  discoveredUpdated,TResult? Function( _AddManual value)?  addManual,TResult? Function( _OpenServer value)?  openServer,TResult? Function( _ConsumeSignal value)?  consumeSignal,}){
 final _that = this;
 switch (_that) {
 case _Start() when start != null:
 return start(_that);case _DiscoveredUpdated() when discoveredUpdated != null:
 return discoveredUpdated(_that);case _AddManual() when addManual != null:
-return addManual(_that);case _:
+return addManual(_that);case _OpenServer() when openServer != null:
+return openServer(_that);case _ConsumeSignal() when consumeSignal != null:
+return consumeSignal(_that);case _:
   return null;
 
 }
@@ -122,12 +128,14 @@ return addManual(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  start,TResult Function( List<DiscoveredServer> servers)?  discoveredUpdated,TResult Function( String host,  int port)?  addManual,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  start,TResult Function( List<DiscoveredServer> servers)?  discoveredUpdated,TResult Function( String host,  int port)?  addManual,TResult Function( DiscoveredServer server)?  openServer,TResult Function()?  consumeSignal,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Start() when start != null:
 return start();case _DiscoveredUpdated() when discoveredUpdated != null:
 return discoveredUpdated(_that.servers);case _AddManual() when addManual != null:
-return addManual(_that.host,_that.port);case _:
+return addManual(_that.host,_that.port);case _OpenServer() when openServer != null:
+return openServer(_that.server);case _ConsumeSignal() when consumeSignal != null:
+return consumeSignal();case _:
   return orElse();
 
 }
@@ -145,12 +153,14 @@ return addManual(_that.host,_that.port);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  start,required TResult Function( List<DiscoveredServer> servers)  discoveredUpdated,required TResult Function( String host,  int port)  addManual,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  start,required TResult Function( List<DiscoveredServer> servers)  discoveredUpdated,required TResult Function( String host,  int port)  addManual,required TResult Function( DiscoveredServer server)  openServer,required TResult Function()  consumeSignal,}) {final _that = this;
 switch (_that) {
 case _Start():
 return start();case _DiscoveredUpdated():
 return discoveredUpdated(_that.servers);case _AddManual():
-return addManual(_that.host,_that.port);}
+return addManual(_that.host,_that.port);case _OpenServer():
+return openServer(_that.server);case _ConsumeSignal():
+return consumeSignal();}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -164,12 +174,14 @@ return addManual(_that.host,_that.port);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  start,TResult? Function( List<DiscoveredServer> servers)?  discoveredUpdated,TResult? Function( String host,  int port)?  addManual,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  start,TResult? Function( List<DiscoveredServer> servers)?  discoveredUpdated,TResult? Function( String host,  int port)?  addManual,TResult? Function( DiscoveredServer server)?  openServer,TResult? Function()?  consumeSignal,}) {final _that = this;
 switch (_that) {
 case _Start() when start != null:
 return start();case _DiscoveredUpdated() when discoveredUpdated != null:
 return discoveredUpdated(_that.servers);case _AddManual() when addManual != null:
-return addManual(_that.host,_that.port);case _:
+return addManual(_that.host,_that.port);case _OpenServer() when openServer != null:
+return openServer(_that.server);case _ConsumeSignal() when consumeSignal != null:
+return consumeSignal();case _:
   return null;
 
 }
@@ -350,9 +362,113 @@ as int,
 }
 
 /// @nodoc
+
+
+class _OpenServer implements DiscoveryEvent {
+  const _OpenServer(this.server);
+  
+
+ final  DiscoveredServer server;
+
+/// Create a copy of DiscoveryEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$OpenServerCopyWith<_OpenServer> get copyWith => __$OpenServerCopyWithImpl<_OpenServer>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OpenServer&&(identical(other.server, server) || other.server == server));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,server);
+
+@override
+String toString() {
+  return 'DiscoveryEvent.openServer(server: $server)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$OpenServerCopyWith<$Res> implements $DiscoveryEventCopyWith<$Res> {
+  factory _$OpenServerCopyWith(_OpenServer value, $Res Function(_OpenServer) _then) = __$OpenServerCopyWithImpl;
+@useResult
+$Res call({
+ DiscoveredServer server
+});
+
+
+
+
+}
+/// @nodoc
+class __$OpenServerCopyWithImpl<$Res>
+    implements _$OpenServerCopyWith<$Res> {
+  __$OpenServerCopyWithImpl(this._self, this._then);
+
+  final _OpenServer _self;
+  final $Res Function(_OpenServer) _then;
+
+/// Create a copy of DiscoveryEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? server = null,}) {
+  return _then(_OpenServer(
+null == server ? _self.server : server // ignore: cast_nullable_to_non_nullable
+as DiscoveredServer,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _ConsumeSignal implements DiscoveryEvent {
+  const _ConsumeSignal();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ConsumeSignal);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'DiscoveryEvent.consumeSignal()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
 mixin _$DiscoveryState {
 
- DiscoveryStatus get status; List<DiscoveredServer> get discovered; List<DiscoveredServer> get manual; String get errorMessage;
+ DiscoveryStatus get status; List<DiscoveredServer> get discovered; List<DiscoveredServer> get manual; String get errorMessage;/// The server whose reachability is currently being checked, so only that
+/// row shows a spinner.
+ DiscoveredServer? get checkingServer;/// Set once when a tapped server is confirmed reachable; the screen
+/// navigates and then clears it via [DiscoveryEvent.consumeSignal].
+ DiscoveredServer? get verifiedServer;/// Set once when a tapped server turns out to be unreachable; the screen
+/// shows a toast and then clears it via [DiscoveryEvent.consumeSignal].
+ String? get unreachableMessage;
 /// Create a copy of DiscoveryState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -363,16 +479,16 @@ $DiscoveryStateCopyWith<DiscoveryState> get copyWith => _$DiscoveryStateCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DiscoveryState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.discovered, discovered)&&const DeepCollectionEquality().equals(other.manual, manual)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DiscoveryState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.discovered, discovered)&&const DeepCollectionEquality().equals(other.manual, manual)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.checkingServer, checkingServer) || other.checkingServer == checkingServer)&&(identical(other.verifiedServer, verifiedServer) || other.verifiedServer == verifiedServer)&&(identical(other.unreachableMessage, unreachableMessage) || other.unreachableMessage == unreachableMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(discovered),const DeepCollectionEquality().hash(manual),errorMessage);
+int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(discovered),const DeepCollectionEquality().hash(manual),errorMessage,checkingServer,verifiedServer,unreachableMessage);
 
 @override
 String toString() {
-  return 'DiscoveryState(status: $status, discovered: $discovered, manual: $manual, errorMessage: $errorMessage)';
+  return 'DiscoveryState(status: $status, discovered: $discovered, manual: $manual, errorMessage: $errorMessage, checkingServer: $checkingServer, verifiedServer: $verifiedServer, unreachableMessage: $unreachableMessage)';
 }
 
 
@@ -383,7 +499,7 @@ abstract mixin class $DiscoveryStateCopyWith<$Res>  {
   factory $DiscoveryStateCopyWith(DiscoveryState value, $Res Function(DiscoveryState) _then) = _$DiscoveryStateCopyWithImpl;
 @useResult
 $Res call({
- DiscoveryStatus status, List<DiscoveredServer> discovered, List<DiscoveredServer> manual, String errorMessage
+ DiscoveryStatus status, List<DiscoveredServer> discovered, List<DiscoveredServer> manual, String errorMessage, DiscoveredServer? checkingServer, DiscoveredServer? verifiedServer, String? unreachableMessage
 });
 
 
@@ -400,13 +516,16 @@ class _$DiscoveryStateCopyWithImpl<$Res>
 
 /// Create a copy of DiscoveryState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? discovered = null,Object? manual = null,Object? errorMessage = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? discovered = null,Object? manual = null,Object? errorMessage = null,Object? checkingServer = freezed,Object? verifiedServer = freezed,Object? unreachableMessage = freezed,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as DiscoveryStatus,discovered: null == discovered ? _self.discovered : discovered // ignore: cast_nullable_to_non_nullable
 as List<DiscoveredServer>,manual: null == manual ? _self.manual : manual // ignore: cast_nullable_to_non_nullable
 as List<DiscoveredServer>,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
-as String,
+as String,checkingServer: freezed == checkingServer ? _self.checkingServer : checkingServer // ignore: cast_nullable_to_non_nullable
+as DiscoveredServer?,verifiedServer: freezed == verifiedServer ? _self.verifiedServer : verifiedServer // ignore: cast_nullable_to_non_nullable
+as DiscoveredServer?,unreachableMessage: freezed == unreachableMessage ? _self.unreachableMessage : unreachableMessage // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -488,10 +607,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DiscoveryStatus status,  List<DiscoveredServer> discovered,  List<DiscoveredServer> manual,  String errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DiscoveryStatus status,  List<DiscoveredServer> discovered,  List<DiscoveredServer> manual,  String errorMessage,  DiscoveredServer? checkingServer,  DiscoveredServer? verifiedServer,  String? unreachableMessage)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DiscoveryState() when $default != null:
-return $default(_that.status,_that.discovered,_that.manual,_that.errorMessage);case _:
+return $default(_that.status,_that.discovered,_that.manual,_that.errorMessage,_that.checkingServer,_that.verifiedServer,_that.unreachableMessage);case _:
   return orElse();
 
 }
@@ -509,10 +628,10 @@ return $default(_that.status,_that.discovered,_that.manual,_that.errorMessage);c
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DiscoveryStatus status,  List<DiscoveredServer> discovered,  List<DiscoveredServer> manual,  String errorMessage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DiscoveryStatus status,  List<DiscoveredServer> discovered,  List<DiscoveredServer> manual,  String errorMessage,  DiscoveredServer? checkingServer,  DiscoveredServer? verifiedServer,  String? unreachableMessage)  $default,) {final _that = this;
 switch (_that) {
 case _DiscoveryState():
-return $default(_that.status,_that.discovered,_that.manual,_that.errorMessage);}
+return $default(_that.status,_that.discovered,_that.manual,_that.errorMessage,_that.checkingServer,_that.verifiedServer,_that.unreachableMessage);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -526,10 +645,10 @@ return $default(_that.status,_that.discovered,_that.manual,_that.errorMessage);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DiscoveryStatus status,  List<DiscoveredServer> discovered,  List<DiscoveredServer> manual,  String errorMessage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DiscoveryStatus status,  List<DiscoveredServer> discovered,  List<DiscoveredServer> manual,  String errorMessage,  DiscoveredServer? checkingServer,  DiscoveredServer? verifiedServer,  String? unreachableMessage)?  $default,) {final _that = this;
 switch (_that) {
 case _DiscoveryState() when $default != null:
-return $default(_that.status,_that.discovered,_that.manual,_that.errorMessage);case _:
+return $default(_that.status,_that.discovered,_that.manual,_that.errorMessage,_that.checkingServer,_that.verifiedServer,_that.unreachableMessage);case _:
   return null;
 
 }
@@ -541,7 +660,7 @@ return $default(_that.status,_that.discovered,_that.manual,_that.errorMessage);c
 
 
 class _DiscoveryState implements DiscoveryState {
-  const _DiscoveryState({this.status = DiscoveryStatus.initial, final  List<DiscoveredServer> discovered = const <DiscoveredServer>[], final  List<DiscoveredServer> manual = const <DiscoveredServer>[], this.errorMessage = ''}): _discovered = discovered,_manual = manual;
+  const _DiscoveryState({this.status = DiscoveryStatus.initial, final  List<DiscoveredServer> discovered = const <DiscoveredServer>[], final  List<DiscoveredServer> manual = const <DiscoveredServer>[], this.errorMessage = '', this.checkingServer, this.verifiedServer, this.unreachableMessage}): _discovered = discovered,_manual = manual;
   
 
 @override@JsonKey() final  DiscoveryStatus status;
@@ -560,6 +679,15 @@ class _DiscoveryState implements DiscoveryState {
 }
 
 @override@JsonKey() final  String errorMessage;
+/// The server whose reachability is currently being checked, so only that
+/// row shows a spinner.
+@override final  DiscoveredServer? checkingServer;
+/// Set once when a tapped server is confirmed reachable; the screen
+/// navigates and then clears it via [DiscoveryEvent.consumeSignal].
+@override final  DiscoveredServer? verifiedServer;
+/// Set once when a tapped server turns out to be unreachable; the screen
+/// shows a toast and then clears it via [DiscoveryEvent.consumeSignal].
+@override final  String? unreachableMessage;
 
 /// Create a copy of DiscoveryState
 /// with the given fields replaced by the non-null parameter values.
@@ -571,16 +699,16 @@ _$DiscoveryStateCopyWith<_DiscoveryState> get copyWith => __$DiscoveryStateCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DiscoveryState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._discovered, _discovered)&&const DeepCollectionEquality().equals(other._manual, _manual)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DiscoveryState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._discovered, _discovered)&&const DeepCollectionEquality().equals(other._manual, _manual)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.checkingServer, checkingServer) || other.checkingServer == checkingServer)&&(identical(other.verifiedServer, verifiedServer) || other.verifiedServer == verifiedServer)&&(identical(other.unreachableMessage, unreachableMessage) || other.unreachableMessage == unreachableMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_discovered),const DeepCollectionEquality().hash(_manual),errorMessage);
+int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_discovered),const DeepCollectionEquality().hash(_manual),errorMessage,checkingServer,verifiedServer,unreachableMessage);
 
 @override
 String toString() {
-  return 'DiscoveryState(status: $status, discovered: $discovered, manual: $manual, errorMessage: $errorMessage)';
+  return 'DiscoveryState(status: $status, discovered: $discovered, manual: $manual, errorMessage: $errorMessage, checkingServer: $checkingServer, verifiedServer: $verifiedServer, unreachableMessage: $unreachableMessage)';
 }
 
 
@@ -591,7 +719,7 @@ abstract mixin class _$DiscoveryStateCopyWith<$Res> implements $DiscoveryStateCo
   factory _$DiscoveryStateCopyWith(_DiscoveryState value, $Res Function(_DiscoveryState) _then) = __$DiscoveryStateCopyWithImpl;
 @override @useResult
 $Res call({
- DiscoveryStatus status, List<DiscoveredServer> discovered, List<DiscoveredServer> manual, String errorMessage
+ DiscoveryStatus status, List<DiscoveredServer> discovered, List<DiscoveredServer> manual, String errorMessage, DiscoveredServer? checkingServer, DiscoveredServer? verifiedServer, String? unreachableMessage
 });
 
 
@@ -608,13 +736,16 @@ class __$DiscoveryStateCopyWithImpl<$Res>
 
 /// Create a copy of DiscoveryState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? discovered = null,Object? manual = null,Object? errorMessage = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? discovered = null,Object? manual = null,Object? errorMessage = null,Object? checkingServer = freezed,Object? verifiedServer = freezed,Object? unreachableMessage = freezed,}) {
   return _then(_DiscoveryState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as DiscoveryStatus,discovered: null == discovered ? _self._discovered : discovered // ignore: cast_nullable_to_non_nullable
 as List<DiscoveredServer>,manual: null == manual ? _self._manual : manual // ignore: cast_nullable_to_non_nullable
 as List<DiscoveredServer>,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
-as String,
+as String,checkingServer: freezed == checkingServer ? _self.checkingServer : checkingServer // ignore: cast_nullable_to_non_nullable
+as DiscoveredServer?,verifiedServer: freezed == verifiedServer ? _self.verifiedServer : verifiedServer // ignore: cast_nullable_to_non_nullable
+as DiscoveredServer?,unreachableMessage: freezed == unreachableMessage ? _self.unreachableMessage : unreachableMessage // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

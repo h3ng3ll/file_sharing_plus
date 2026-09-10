@@ -29,6 +29,9 @@ class DeviceListView extends StatelessWidget {
           separatorBuilder: (_, _) => const Divider(height: 1.0),
           itemBuilder: (context, index) {
             final server = servers[index];
+            // Scope the spinner to the row actually being checked.
+            final isChecking =
+                state.isCheckingServer && state.checkingServer == server;
             return ListTile(
               leading: Icon(
                 server.isManual ? Icons.edit_location_alt : Icons.computer,
@@ -44,8 +47,17 @@ class DeviceListView extends StatelessWidget {
                   color: AppColors.textSecondary.value,
                 ),
               ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => onTapServer(server),
+              trailing: isChecking
+                  ? const SizedBox(
+                      width: 20.0,
+                      height: 20.0,
+                      child: CircularProgressIndicator(strokeWidth: 2.0),
+                    )
+                  : const Icon(Icons.chevron_right),
+              // Ignore further taps while a reachability check is in flight.
+              onTap: state.isCheckingServer
+                  ? null
+                  : () => onTapServer(server),
             );
           },
         );

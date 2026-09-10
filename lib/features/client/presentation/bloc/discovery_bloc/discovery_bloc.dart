@@ -23,6 +23,8 @@ class DiscoveryBloc extends Bloc<DiscoveryEvent, DiscoveryState> {
     on<_Start>(_start);
     on<_DiscoveredUpdated>(_discoveredUpdated);
     on<_AddManual>(_addManual);
+    on<_OpenServer>(_openServer);
+    on<_ConsumeSignal>(_consumeSignal);
   }
 
   Future<void> _start(_Start event, Emitter<DiscoveryState> emit) async {
@@ -84,6 +86,58 @@ class DiscoveryBloc extends Bloc<DiscoveryEvent, DiscoveryState> {
           status: DiscoveryStatus.failure,
           errorMessage: failure.message,
         ),
+      ),
+    );
+  }
+
+  Future<void> _openServer(
+    _OpenServer event,
+    Emitter<DiscoveryState> emit,
+  ) async {
+    final server = event.server;
+
+    emit(
+      state.copyWith(
+        status: DiscoveryStatus.checkingServer,
+        checkingServer: server,
+        verifiedServer: null,
+        unreachableMessage: null,
+      ),
+    );
+
+    final result = await _pingServerUseCase(
+      host: server.host,
+      port: server.port,
+    );
+
+    result.fold(
+      (_) => emit(
+        state.copyWith(
+          status: DiscoveryStatus.discovering,
+          checkingServer: null,
+          verifiedServer: server,
+        ),
+      ),
+      (_) => emit(
+        state.copyWith(
+          status: DiscoveryStatus.discovering,
+          checkingServer: null,
+          // A discovered entry can outlive the server it points at, so this
+          // is an expected outcome rather than a discovery failure.
+          discovered: state.discovered.where((s) => s != server).toList(),
+          manual: state.manual.where((s) => s != server).toList(),
+          unreachableMessage:
+              '${server.name} is not available now (${server.host}:${server.port})',
+        ),
+      ),
+    );
+  }
+
+  void _consumeSignal(_ConsumeSignal event, Emitter<DiscoveryState> emit) {
+    emit(
+      state.copyWith(
+        verifiedServer: null,
+        unreachableMessage: null,
       ),
     );
   }
